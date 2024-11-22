@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764673773227",
+    "project_id": "tasklist-dartfrog-64a2c",
+    "storage_bucket": "tasklist-dartfrog-64a2c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764673773227:android:1a42c65295ea6808d7b1ee",
+        "android_client_info": {
+          "package_name": "com.example.icc_maps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUESHFY7EzO2SBWCwVRrRI2qJPMxkeikQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
