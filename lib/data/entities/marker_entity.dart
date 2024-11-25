@@ -181,6 +181,22 @@ class MarkerEntity {
 
   static void showConfirmationDialog(
       BuildContext context, int posLocationId, VoidCallback onReload) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userRole = userProvider.getUser()?.authorities ?? "USER";
+
+    if ((userRole.contains('USER') || userRole.contains('AGENT'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFFb60000),
+          content: Text(
+            'No tienes permiso para cerrar este punto de venta.',
+            style: TextStyle(color: Colors.white),
+          ),
+          duration: Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -245,6 +261,25 @@ class MarkerEntity {
   }
 
   static void showMallDialog(BuildContext context, int groupId) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.getUser();
+    final userAuthorities = user?.authorities;
+
+    if (userAuthorities == null ||
+        !userAuthorities.contains('TRAIN_POS_ADMIN')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFFb60000),
+          content: Text(
+            'No tienes permiso para inhabilitar este centro comercial.',
+            style: TextStyle(color: Colors.white),
+          ),
+          duration: Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {

@@ -1,6 +1,5 @@
 // ignore_for_file: unused_local_variable
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,6 +8,7 @@ import 'package:icc_maps/data/services/dropdown_data_loader.dart';
 import 'package:icc_maps/ui/pages/map/widgets/form/widgets/custom_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 
 class CreateFormMall extends StatefulWidget {
   const CreateFormMall({Key? key}) : super(key: key);
@@ -76,6 +76,7 @@ class _CreateFormMallState extends State<CreateFormMall> {
                     builder: (context, dropdownData, child) {
                       if (dropdownData.isLoading) {
                         return const Center(child: CircularProgressIndicator());
+                                                
                       }
                       if (dropdownData.errorMessage.isNotEmpty) {
                         return Center(child: Text(dropdownData.errorMessage));
@@ -88,11 +89,13 @@ class _CreateFormMallState extends State<CreateFormMall> {
                               controller: formState.nombreController,
                               label: 'Nombre',
                               icon: Icons.person_add,
+                              inputFormatters: [CapitalizeTextInputFormatter()],
                             ),
                             CustomTextField(
                               controller: formState.descripcionController,
                               label: 'Descripción',
                               icon: Icons.add_box,
+                              inputFormatters: [CapitalizeTextInputFormatter()],
                             ),
                             Center(
                               child: ElevatedButton.icon(
@@ -443,4 +446,25 @@ Future<void> _getCurrentLocation(FormStateHandler formState) async {
       desiredAccuracy: LocationAccuracy.high);
   formState.latController.text = position.latitude.toString();
   formState.lonController.text = position.longitude.toString();
+}
+
+class CapitalizeTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    final words = newValue.text.split(' ');
+    final capitalizedWords = words.map((word) {
+      if (word.isNotEmpty) {
+        return word.toUpperCase();
+      }
+      return word;
+    }).join(' ');
+
+    return newValue.copyWith(
+      text: capitalizedWords,
+      selection: newValue.selection,
+    );
+  }
 }

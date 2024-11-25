@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:icc_maps/domain/use_cases/login_use_case.dart';
 import 'package:icc_maps/ui/context/user_provider.dart';
 import 'package:icc_maps/ui/pages/home/home_page.dart';
+import 'package:icc_maps/ui/pages/login/widgets/inactivity_logout_widget.dart';
 import 'package:icc_maps/ui/pages/login/widgets/login_button.dart';
 import 'package:provider/provider.dart';
 
@@ -26,20 +27,25 @@ class _LoginPageState extends State<LoginPage> {
     final username = _usernameController.text;
     final password = _passwordController.text;
 
+    if (!mounted) return;
+
     if (username.isEmpty || password.isEmpty) {
       _showErrorDialog('Por favor ingrese nombre de usuario y contraseña.');
       return;
     }
 
-    final response = await _loginUseCase.loginUser(username, password);
+    final response =
+    await _loginUseCase.loginUser(username, password, _userProvider!);
+
+    if (!mounted) return;
 
     if (response.username.isNotEmpty) {
       _userProvider?.saveUser(response);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              HomePage(username: username, password: password),
+          builder: (context) => InactivityLogoutWidget(
+              child: HomePage(username: username, password: password)),
         ),
       );
     } else {
@@ -48,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showErrorDialog(String message) {
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -94,7 +101,9 @@ class _LoginPageState extends State<LoginPage> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
+                            if (mounted) {
+                              Navigator.of(context).pop();
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,
@@ -151,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
                         labelText: 'Usuario',
                         border: OutlineInputBorder(
                             borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                            BorderRadius.all(Radius.circular(10))),
                       ),
                       keyboardType: TextInputType.text,
                       style: const TextStyle(fontSize: 16.0),
@@ -164,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                         labelText: 'Contraseña',
                         border: OutlineInputBorder(
                             borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                            BorderRadius.all(Radius.circular(10))),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _passwordVisible

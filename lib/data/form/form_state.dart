@@ -337,7 +337,7 @@ class FormStateHandler extends ChangeNotifier {
   Future<void> postPOSToServer(
       BuildContext context, Map<String, dynamic> jsonData) async {
     final uri =
-        Uri.parse('https://webtest.prt.local/icc/api/uploadPosLocationToDb'
+        Uri.parse('https://webtest/icc/api/uploadPosLocationToDb'
             // 'http://192.168.1.5:8082/uploadPosLocationToDb'
             );
 

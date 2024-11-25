@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icc_maps/domain/use_cases/login_use_case.dart';
 import 'package:icc_maps/ui/context/user_provider.dart';
 import 'package:icc_maps/ui/pages/login/login_page.dart';
 import 'package:icc_maps/ui/pages/map/widgets/app_info.dart';
@@ -13,8 +14,11 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final username = userProvider.getUser()?.username ?? 'Invitado';
+       final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final username = userProvider.getUser()?.username ?? 'Invitado';   
+    final loginUseCase = LoginUseCase();
+    final user = userProvider.getUser();
+    final userProfile = user?.authorities;
 
     return Drawer(
       child: Container(
@@ -61,24 +65,27 @@ class CustomDrawer extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 20),
-                  CustomListTile(
-                    icon: Symbols.post_add,
-                    title: 'Añadir POS',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _navigateTo(context, const CreateFormPos());
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  CustomListTile(
-                    icon: Symbols.add_business,
-                    title: 'Añadir Mall',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _navigateTo(context, const CreateFormMall());
-                    },
-                  ),
-                  const SizedBox(height: 20),
+                  if (userProfile!.contains('ADMIN')) ...[
+                    CustomListTile(
+                      icon: Symbols.post_add,
+                      title: 'Añadir POS',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(context, const CreateFormPos());
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    CustomListTile(
+                      icon: Symbols.add_business,
+                      title: 'Añadir Mall',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateTo(context, const CreateFormMall());
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
                   CustomListTile(
                     icon: Symbols.info,
                     title: 'Información',
@@ -92,10 +99,18 @@ class CustomDrawer extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
+                onPressed: () async {
+                  await userProvider.clearMunicipalitiesCache();
+                  final logoutResponse =
+                      await loginUseCase.logoutUser(userProvider);
+                  if (logoutResponse.ok) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
+                    );
+                  } else {
+                    _showLogoutError(context, logoutResponse.message);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -131,16 +146,16 @@ class CustomDrawer extends StatelessWidget {
 }
 
 class CustomListTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
   const CustomListTile({
     Key? key,
     required this.icon,
     required this.title,
     required this.onTap,
   }) : super(key: key);
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -157,4 +172,24 @@ class CustomListTile extends StatelessWidget {
       onTap: onTap,
     );
   }
+}
+
+void _showLogoutError(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Error al cerrar sesión"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text("Cerrar"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'firebase_options.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'firebase_options.dart';
 
 import 'package:icc_maps/data/form/form_state.dart';
 import 'package:icc_maps/data/services/dropdown_data_loader.dart';
@@ -13,27 +13,27 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
 
-  await _requestLocationPermission();
+  // await _requestLocationPermission();
 
   runApp(const MyApp());
 }
 
-Future<void> _requestLocationPermission() async {
-  var status = await Permission.location.status;
-  if (!status.isGranted) {
-    status = await Permission.location.request();
-  }
-  if (status.isDenied) {
-    print('El permiso de ubicación fue denegado.');
-  }
-  if (status.isPermanentlyDenied) {
-    openAppSettings();
-  }
-}
+// Future<void> _requestLocationPermission() async {
+//   var status = await Permission.location.status;
+//   if (!status.isGranted) {
+//     status = await Permission.location.request();
+//   }
+//   if (status.isDenied) {
+//     print('El permiso de ubicación fue denegado.');
+//   }
+//   if (status.isPermanentlyDenied) {
+//     openAppSettings();
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

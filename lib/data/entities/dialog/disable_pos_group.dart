@@ -12,7 +12,7 @@ Future<void> disablePosGroup(BuildContext context, int groupId) async {
   final userName = userProvider.getUser()?.username ?? "default_username";
 
   final url = Uri.parse(
-    'https://webtest.prt.local/icc/api/disablePosGroup',
+    'https://webtest/icc/api/disablePosGroup',
   );
 
   final client = HttpClient()

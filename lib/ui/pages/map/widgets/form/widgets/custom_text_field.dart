@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -9,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final TextInputAction inputAction;
   final bool enableInteractiveSelection;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     Key? key,
@@ -20,6 +22,7 @@ class CustomTextField extends StatelessWidget {
     this.readOnly = false,
     this.inputAction = TextInputAction.next,
     this.enableInteractiveSelection = false,
+    this.inputFormatters,
   }) : super(key: key);
 
   @override
@@ -29,11 +32,12 @@ class CustomTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType:
-            isNumber ? const TextInputType.numberWithOptions() : inputType,
+        isNumber ? const TextInputType.numberWithOptions() : inputType,
         style: const TextStyle(color: Colors.white, fontSize: 20),
         readOnly: readOnly,
         textInputAction: inputAction,
         enableInteractiveSelection: enableInteractiveSelection,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(color: Colors.white60, fontSize: 20),

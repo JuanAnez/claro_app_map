@@ -12,7 +12,7 @@ import 'package:icc_maps/data/utils/hex_color.dart';
 import 'package:http/http.dart';
 
 class WebtestClient extends ApiRepository {
-  static const _prefix = "https://webtest.prt.local/icc/api";
+  static const _prefix = "https://webtest/icc/api";
   // static const _prefix = "http://192.168.1.5:8082";
 
   static const _antennasURL = "$_prefix/getBaseCoords?polygonTypeID=";

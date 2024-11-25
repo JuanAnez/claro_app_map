@@ -6,6 +6,7 @@ import 'package:icc_maps/ui/pages/map/widgets/form/widgets/custom_autocomplete.d
 import 'package:icc_maps/ui/pages/map/widgets/form/widgets/custom_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
 
 class CreateFormPos extends StatefulWidget {
   const CreateFormPos({Key? key}) : super(key: key);
@@ -63,6 +64,7 @@ class _CreateFormState extends State<CreateFormPos> {
                             controller: formState.nombreController,
                             label: 'Nombre',
                             icon: Icons.person_add,
+                            inputFormatters: [CapitalizeTextInputFormatter()],
                           ),
                           _buildDropdown(
                             label: 'Descripción de Ubicación',
@@ -127,6 +129,7 @@ class _CreateFormState extends State<CreateFormPos> {
                             controller: formState.addressController,
                             label: 'Dirección',
                             icon: Icons.add_home,
+                            inputFormatters: [CapitalizeTextInputFormatter()],
                           ),
                           _buildDropdown(
                             label: 'Pueblo',
@@ -393,4 +396,25 @@ Future<void> _getCurrentLocation(FormStateHandler formState) async {
       desiredAccuracy: LocationAccuracy.high);
   formState.latController.text = position.latitude.toString();
   formState.lonController.text = position.longitude.toString();
+}
+
+class CapitalizeTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    final words = newValue.text.split(' ');
+    final capitalizedWords = words.map((word) {
+      if (word.isNotEmpty) {
+        return word.toUpperCase();
+      }
+      return word;
+    }).join(' ');
+
+    return newValue.copyWith(
+      text: capitalizedWords,
+      selection: newValue.selection,
+    );
+  }
 }

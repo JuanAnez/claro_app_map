@@ -234,7 +234,7 @@ class _ReasonDialogState extends State<ReasonDialog> {
     final username = userProvider.getUser()?.username ?? "default_username";
 
     final uri =
-        Uri.parse("https://webtest.prt.local/icc/api/disablePosLocation");
+        Uri.parse("https://webtest/icc/api/disablePosLocation");
     final client = HttpClient()
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
