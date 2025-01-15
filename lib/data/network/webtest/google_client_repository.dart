@@ -87,6 +87,8 @@ class GoogleClient extends GoogleRepository {
       return MessageResponse(ok: false, message: e.toString());
     }
   }
+
+  fetchGeoJsonGzip(Uri parse) {}
 }
 
 // static const _antennasURL = "$_prefix/getBaseCoords?polygonTypeID=";
