@@ -8,7 +8,7 @@ import 'package:icc_maps/ui/context/user_provider.dart';
 class LoginService {
   Future<String?> _getAccessToken(
       String username, String password, UserProvider userProvider) async {
-    final url = Uri.parse('https://webtest/icc/api/login-ws');
+    final url = Uri.parse('https://webtest.prt.local/icc/api/login-ws');
     // final url = Uri.parse('http://192.168.1.5:7001/icc/api/login-ws');
     final client = HttpClient()
       ..badCertificateCallback =
@@ -60,7 +60,7 @@ class LoginService {
     }
 
     final url = Uri.parse(
-        'https://webtest/icc/api/getUserAuthorities?userName=$username');
+        'https://webtest.prt.local/icc/api/getUserAuthorities?userName=$username');
     // final url = Uri.parse(
     //     'http://192.168.1.5:7001/icc/api/getUserAuthorities?userName=$username');
     final client = HttpClient()
@@ -97,7 +97,7 @@ class LoginService {
   }
 
   Future<MessageResponse> doLogout(UserProvider userProvider) async {
-    final url = Uri.parse('https://webtest/icc/api/logout-ws');
+    final url = Uri.parse('https://webtest.prt.local/icc/api/logout-ws');
     // final url = Uri.parse('http://192.168.1.5:7001/icc/api/logout-ws');
     final client = HttpClient()
       ..badCertificateCallback =

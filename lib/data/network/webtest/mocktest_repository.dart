@@ -14,23 +14,23 @@ import 'package:latlong2/latlong.dart';
 
 class MocktestClient extends SaleRepository {
   static const _saleURL =
-      "https://webtest/icc/api/getPosLocationsInfo";
+      "https://webtest.prt.local/icc/api/getPosLocationsInfo";
   // "http://192.168.1.5:8082/getPosLocationsInfo";
   // "http://192.168.1.5:8080/api/pos-location/getPosLocationsInfo";
   static const _municipalitiesURL =
-      "https://webtest/geojson/municipalities.geojson?d=2";
+      "https://webtest.prt.local/geojson/municipalities.geojson?d=2";
   // "http://192.168.1.5:8082/municipalities";
   static const _marketShareURL =
-      "https://webtest/icc/api/getMarketShareForTown?town=";
+      "https://webtest.prt.local/icc/api/getMarketShareForTown?town=";
   // "http://192.168.1.5:8082/getMarketShareForTown?town=";
   static const _posLovByTypeURL =
-      "https://webtest/icc/api/getPosLovByType?lovType=";
+      "https://webtest.prt.local/icc/api/getPosLovByType?lovType=";
   // "http://192.168.1.5:8082/getPosLovByType?lovType=";
   static const _getPosLocDropdownInputsURL =
-      "https://webtest/icc/api/getPosLocDropdownInputs";
+      "https://webtest.prt.local/icc/api/getPosLocDropdownInputs";
   // "http://192.168.1.5:8082/getPosLovByType?lovType=";
   static const _mallURL =
-      "https://webtest/icc/api/findPosGroupsWithLocRef";
+      "https://webtest.prt.local/icc/api/findPosGroupsWithLocRef";
   // "http://192.168.1.5:8082/findPosGroupsWithLocRef";
 
   @override
@@ -373,37 +373,37 @@ class MocktestClient extends SaleRepository {
 
   Future<MessageResponse> getAgentCode(String searchTerm) async {
     final uri = Uri.parse(
-        "https://webtest/icc/api/getAllMatchPosDealers?searchTerm=$searchTerm");
+        "https://webtest.prt.local/icc/api/getAllMatchPosDealers?searchTerm=$searchTerm");
     return await _fetchFromApi(uri);
   }
 
   Future<MessageResponse> getFixedAgentCode(String searchTerm) async {
     final uri = Uri.parse(
-        "https://webtest/icc/api/getAllMatchPosFixedDealers?searchTerm=$searchTerm");
+        "https://webtest.prt.local/icc/api/getAllMatchPosFixedDealers?searchTerm=$searchTerm");
     return await _fetchFromApi(uri);
   }
 
   Future<MessageResponse> getTownDemographic(String selectedTown) async {
     final uri = Uri.parse(
-        "https://webtest/icc/api/getTownDemographic?selectedTown=$selectedTown");
+        "https://webtest.prt.local/icc/api/getTownDemographic?selectedTown=$selectedTown");
     return await _fetchFromApi(uri);
   }
 
   Future<MessageResponse> getMarketShareValue(
       int selectedType, int selectedOperator) async {
     final uri = Uri.parse(
-        "https://webtest/icc/api/getMarketShareValue?selectedType=$selectedType&selectedOperator=$selectedOperator");
+        "https://webtest.prt.local/icc/api/getMarketShareValue?selectedType=$selectedType&selectedOperator=$selectedOperator");
     return await _fetchFromApi(uri);
   }
 
   Future<MessageResponse> getTowns() async {
-    final uri = Uri.parse("https://webtest/icc/api/getTowns");
+    final uri = Uri.parse("https://webtest.prt.local/icc/api/getTowns");
     return await _fetchFromApi(uri);
   }
 
   Future<MessageResponse> getAllLocations(String selectedTown) async {
     final uri = Uri.parse(
-        "https://webtest/icc/api/getPosLocationsReferencesByTown?town=$selectedTown");
+        "https://webtest.prt.local/icc/api/getPosLocationsReferencesByTown?town=$selectedTown");
     return await _fetchFromApi(uri);
   }
 
