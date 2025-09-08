@@ -1,0 +1,2 @@
+/home/janez/isy/icc-claro-app/android/app/.cxx/RelWithDebInfo/2n5gn2b6/arm64-v8a/CMakeFiles/edit_cache.dir
+/home/janez/isy/icc-claro-app/android/app/.cxx/RelWithDebInfo/2n5gn2b6/arm64-v8a/CMakeFiles/rebuild_cache.dir

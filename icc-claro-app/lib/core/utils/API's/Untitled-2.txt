@@ -1,0 +1,562 @@
+
+
+Recorrido/Trabajado
+https://webtest.prt.local/icc/api/finishRouteBatch
+{
+    "routeIds": "8259,8258,8257",
+    "userName": "train_pos_user"
+}
+
+Solicitar Cierre POS
+https://webtest.prt.local/icc/api/requestCloseRoute
+{
+    "routeId": 8255,
+    "posCloseReason": "Problemas de Infraestructura",
+    "closeReasonDesc": "Prueba de API",
+    "userName": "train_pos_user"
+}
+
+Crear Nuevo Punto de Venta
+https://webtest.prt.local/icc/api/insertPosRoute
+{
+  "posLocName": "CLARO TEST",
+  "posLocDesc": "COSTCO",
+  "posLocType": 33,
+  "posLocOperator": 4,
+  "posLocChannel": 12,
+  "posLocAddress": "Prueba 123",
+  "posLocTown": "Aguada",
+  "posLocZone": 3,
+  "posLocZoneDesc": "Este",
+  "posLocDemo": 37954,
+  "posLocShareMktValue": 0.0,
+  "posLocLat": "18.413123",
+  "posLocLon": "-66.1235636",
+  "posLocManager": "MARLYN SANFELIZ BERRÍOS",
+  "posLocAssistant": "MYRNA ORTIZ RODRIGUEZ",
+  "posDealer": "41232",
+  "posLocationCode": "SAP2",
+  "routeManager": 211,
+  "routeAssistant": 231,
+  "routeAssigned": 206,
+  "userName": "train_pos_user"
+}
+
+Editar Recorrido Existente
+https://webtest.prt.local/icc/api/updateRoute
+{
+     "posLocationRouteId": "8254",
+     "posLocationId": "585",
+     "posLocName": "CLARO TEST",
+     "posLocDesc": "COSTCO",
+     "posLocType": "33",
+     "posLocOperator": "4",
+     "posLocChannel": "12",
+     "posLocAddress": "Prueba 123",
+     "posLocTown": "Aguada",
+     "posLocZone": "3",
+     "posLocZoneDesc": "Este",
+     "posLocDemo": " 37954",
+     "posLocShareMktValue": "0.0",
+     "posLocLat": "18.413123",
+     "posLocLon": "-66.1235636",
+     "posLocManager": "MARLYN SANFELIZ BERRÍOS",
+     "posLocAssistant": "MYRNA ORTIZ RODRIGUEZ",
+     "posDealer": "41232",
+     "posLocationCode": "SAP2",
+     "closeReason": "",
+     "closeReasonDescription": "",
+     "routeManager": 211,
+     "routeAssistant": 231,
+     "routeAssigned": 206
+}
+
+Aprobar Recorrido
+https://webtest.prt.local/icc/api/approveByAssistant
+{
+        "routeIds": "8254,8253,8252",
+        "userName": "train_pos_user",
+}
+
+Aprobar Recorrido
+https://webtest.prt.local/icc/api/approveByManager
+{
+        "routeIds": "8254,8253,8252",
+        "userName": "train_pos_user",
+}
+
+Devolver Recorrido
+https://webtest.prt.local/icc/api/returnRouteToPosUser
+{
+        "routeIds": "8254,8253,8252",
+        "userName": "train_pos_user",
+}
+
+Cancelar Recorrido
+https://webtest.prt.local/icc/api/cancelRoute
+{
+        "routeId": "8254",
+        "userName": "train_pos_user",
+}
+
+Cerrar POS
+https://webtest.prt.local/icc/api/closeRoute
+{
+        "routeId": "8254",
+        "userName": "train_pos_user",
+}
+
+Validar Recorrido
+https://webtest.prt.local/icc/api/validateRoute
+{
+        "routeIds": "8254,8253,8252",
+        "userName": "train_pos_user",
+}
+
+
+Api para buscar lista de comentarios
+https://webtest.prt.local/icc/api/findRouteComments?routeId=8261&userName=train_pos_user
+
+Api para insertar comentario
+https://webtest.prt.local/icc/api/insertRouteComment
+{
+        "comment": "Prueba 123 comentario",
+        "location": 585,
+        "routeId": 8254,
+        "userName": "train_pos_user",
+}
+
+Api para buscar lista de documentos
+https://webtest.prt.local/icc/api/findRouteDocuments?routeId=8254&userName=train_pos_user
+
+Api para insertar documento
+https://webtest.prt.local/icc/api/insertPosRouteDocuments
+      (ArrayList<String>) payload.get("fileNames");
+      (ArrayList<String>) payload.get("fileDescriptions");
+      (ArrayList<Integer>) payload.get("fileLocations");
+      (ArrayList<String>) payload.get("fileDocumentTypes");
+      (ArrayList<MultipartFile>) payload.get("files");
+      (ArrayList<Integer>) payload.get("fileRouteIds");
+
+ 
+
+ 
+
+ 
+
+
+https://webtest.prt.local/icc/api/getRouteCloseDates
+[
+    "03/15/2025",
+    "06/15/2025",
+    "09/15/2025",
+    "12/15/2025"
+]
+
+https://webtest.prt.local/icc/api/getRouteUserManagerStatus?userId=231
+true
+
+/*function getColumnasPosUserOpenRoutes()
+    {
+        let columnas = [];
+        columnas.push({data: 'posLocationRouteID'});    // 0
+        columnas.push({data: 'posLocationID'}); // 1
+        columnas.push({data: 'status'});    // 14
+        columnas.push({data: 'posLocationInfo'});   // 2
+        
+        columnas.push({data: 'locDescription'});   // 
+        columnas.push({data: 'locGroupName'});   //                 
+        
+        columnas.push({data: 'locType'});   // 3
+        columnas.push({data: 'posOperator'});   // 4
+        columnas.push({data: 'channel'});   // 5
+        columnas.push({data: 'posAddress'});    // 6
+        columnas.push({data: 'posTown'});   // 7
+        columnas.push({data: 'latitude'});  // 8
+        columnas.push({data: 'longitude'}); // 9
+        columnas.push({data: 'posManager'});    // 10
+        columnas.push({data: 'posAssistant'});  // 11
+        columnas.push({data: 'posDealer'}); // 12
+        columnas.push({data: 'posLocationCode'});   // 13
+
+        
+        columnsOpenRoutesFile = columnas;
+        return columnas;
+    }
+    //  Incoming Routes
+    function getColumnasPosLocAdminIncomingRoutes()
+    {
+        let columnas = [];
+        columnas.push({data: 'posLocationRouteID'});    // 0
+        columnas.push({data: 'posLocationID'}); // 1
+        columnas.push({data: 'status'});    // 14
+        columnas.push({data: 'posLocationInfo'});   // 2
+        
+        columnas.push({data: 'locDescription'});   // 3
+        columnas.push({data: 'locGroupName'});   //    4             
+        
+        columnas.push({data: 'locType'});   // 5
+        columnas.push({data: 'posOperator'});   // 6
+        columnas.push({data: 'channel'});   // 7
+        columnas.push({data: 'posAddress'});    // 8
+        columnas.push({data: 'posTown'});   // 9
+        columnas.push({data: 'latitude'});  // 10
+        columnas.push({data: 'longitude'}); // 11
+        columnas.push({data: 'posManager'});    // 12
+        columnas.push({data: 'posAssistant'});  // 13
+        columnas.push({data: 'posDealer'}); // 14
+        columnas.push({data: 'posLocationCode'});   // 15
+
+        console.log("isManager: " + isManager);
+        if (!isManager) /Asistente de recorrido 
+        {
+                columnas.push({data: 'creationDate'});
+                columnas.push({data: 'routeAssignedName'}); 
+                columnas.push({data: 'routeTypeAssigned'});     // Tipo de recorrido
+                columnas.push({data: 'statusRouteAssigned'});
+            } 
+            else if (isManager) // Gerente de recorrido
+            {
+                columnas.push({data: 'creationDate'});
+                columnas.push({data: 'agingRouteAssigned'}); 
+                columnas.push({data: 'routeAssignedName'}); 
+                columnas.push({data: 'routeTypeAssigned'});     // Tipo de recorrido 
+                columnas.push({data: 'statusRouteAssigned'});
+    
+                columnas.push({data: 'approvalAssignedDate'});
+                columnas.push({data: 'agingRouteAssistant'}); 
+                columnas.push({data: 'routeAssistantName'}); 
+                columnas.push({data: 'routeTypeAssistant'});    //Tipo de recorrido
+                columnas.push({data: 'statusRouteAssistant'});
+            }
+            columnsIncomingRoutesFile = columnas;
+            return columnas;
+        }
+        
+        function getColumnasPosAdminIncomingRoutes()
+        {
+            let columnas = [];
+            columnas.push({data: 'posLocationRouteID'});    // 0
+            columnas.push({data: 'posLocationID'}); // 1
+            columnas.push({data: 'status'});    // 14
+            columnas.push({data: 'posLocationInfo'});   // 2
+            columnas.push({data: 'locDescription'});   // 
+            columnas.push({data: 'locGroupName'});   // 3
+            
+            columnas.push({data: 'locType'});   // 4
+            columnas.push({data: 'posOperator'});   // 
+            columnas.push({data: 'channel'});   // 
+            columnas.push({data: 'posAddress'});    // 
+            columnas.push({data: 'posTown'});   // 
+            
+            columnas.push({data: 'posZone'});
+            columnas.push({data: 'posZoneDescription'});
+            columnas.push({data: 'posDemographics'});
+            columnas.push({data: 'posShareMktValue'});
+            columnas.push({data: 'latitude'});  // 
+            
+            columnas.push({data: 'longitude'}); // 
+            columnas.push({data: 'posManager'});    //
+            columnas.push({data: 'posAssistant'});  // 
+            columnas.push({data: 'posDealer'}); // 
+            columnas.push({data: 'posLocationCode'});   // 
+            
+            columnas.push({data: 'creationDate'}); //
+            columnas.push({data: 'agingRouteAssigned'});
+            columnas.push({data: 'routeAssignedName'}); 
+            columnas.push({data: 'routeTypeAssigned'});  // Tipo de recorrido
+            columnas.push({data: 'statusRouteAssigned'});
+            
+            columnas.push({data: 'approvalAssignedDate'});
+            columnas.push({data: 'agingRouteAssistant'});
+            columnas.push({data: 'routeAssistantName'});
+            columnas.push({data: 'routeTypeAssistant'});  
+            columnas.push({data: 'statusRouteAssistant'});
+    
+            columnas.push({data: 'approvalAssistantDate'});
+            columnas.push({data: 'agingRouteManager'});
+            columnas.push({data: 'routeManagerName'});
+            columnas.push({data: 'routeTypeManager'});  
+            columnas.push({data: 'statusRouteManager'});
+            
+            columnsIncomingRoutesFile = columnas;
+            return columnas;
+    
+        }
+        
+        function getColumnasPosLocAdminOpenRoutes()
+        {
+            let columnas = [];
+            columnas.push({data: 'posLocationRouteID'}); // 
+            columnas.push({data: 'posLocationID'}); //
+            columnas.push({data: 'status'});    // 14
+            columnas.push({data: 'posLocationInfo'});   // 
+            columnas.push({data: 'locDescription'});   // 
+            columnas.push({data: 'locGroupName'});   //  
+            
+            columnas.push({data: 'locType'}); // 
+            columnas.push({data: 'posOperator'}); // 
+            columnas.push({data: 'channel'}); // 
+            columnas.push({data: 'posAddress'}); // 
+            columnas.push({data: 'posTown'}); // 
+            columnas.push({data: 'latitude'}); // 
+            columnas.push({data: 'longitude'}); // 
+            columnas.push({data: 'posManager'}); //
+            columnas.push({data: 'posAssistant'}); // 
+            columnas.push({data: 'posDealer'}); // 
+            columnas.push({data: 'posLocationCode'}); // 
+            
+            columnas.push({data: 'creationDate'}); //
+            columnas.push({data: 'routeAssignedName'}); // 
+            columnas.push({data: 'routeTypeAssigned'});  //     // Tipo de recorrido
+            if (isManager)
+            {
+                columnas.push({data: 'approvalAssignedDate'}); //
+                columnas.push({data: 'routeAssistantName'}); // 
+                columnas.push({data: 'routeTypeAssistant'}); //    // Tipo de recorrido
+                // columnas.push({data: 'currentlyAssignedStatus'}); //
+            } else { // Asistente de recorrido 
+            // columnas.push({data: 'currentlyAssignedStatus'}); //
+            columnas.push({data: 'currentlyAging'}); // 
+            }
+            columnsOpenRoutesFile = columnas;
+            return columnas;
+        }
+        
+        function getColumnasPosAdminOpenRoutes()
+        {
+            let columnas = [];
+            columnas.push({data: 'posLocationRouteID'});    // 0
+            columnas.push({data: 'posLocationID'}); // 1
+            columnas.push({data: 'status'});    // 14
+            columnas.push({data: 'posLocationInfo'});   // 2
+            columnas.push({data: 'locDescription'});   // 
+            columnas.push({data: 'locGroupName'});   // 3
+            
+            columnas.push({data: 'locType'});   // 4
+            columnas.push({data: 'posOperator'});   // 
+            columnas.push({data: 'channel'});   // 
+            columnas.push({data: 'posAddress'});    // 
+            columnas.push({data: 'posTown'});   // 
+            
+            columnas.push({data: 'posZone'});
+            columnas.push({data: 'posZoneDescription'});
+            columnas.push({data: 'posDemographics'});
+            columnas.push({data: 'posShareMktValue'});
+            columnas.push({data: 'latitude'});  // 
+            
+            columnas.push({data: 'longitude'}); // 
+            columnas.push({data: 'posManager'});    //
+            columnas.push({data: 'posAssistant'});  // 
+            columnas.push({data: 'posDealer'}); // 
+            columnas.push({data: 'posLocationCode'});   // 
+            
+            columnas.push({data: 'creationDate'}); //
+            columnas.push({data: 'routeAssignedName'}); // 
+            columnas.push({data: 'routeTypeAssigned'});  //     // Tipo de recorrido
+            
+            columnas.push({data: 'approvalAssignedDate'}); // 
+            columnas.push({data: 'routeAssistantName'}); // 
+            columnas.push({data: 'routeTypeAssistant'}); //    //Tipo de recorrido 
+            
+            columnas.push({data: 'approvalAssistantDate'}); // 
+            columnas.push({data: 'routeManagerName'}); // 
+            columnas.push({data: 'routeTypeManager'}); // Tipo de recorrido
+            
+            columnsOpenRoutesFile = columnas;
+            return columnas;
+        }
+        
+        function getColumnasWorkedBasicDefault()
+        {
+            let columnasWorked = [];
+    
+            columnasWorked.push({data: 'posLocationRouteID'}); // 
+            columnasWorked.push({data: 'posLocationID'}); //
+            columnasWorked.push({data: 'status'});    // 14
+            columnasWorked.push({data: 'posLocationInfo'}); // 
+            columnasWorked.push({data: 'locDescription'});   // 
+            columnasWorked.push({data: 'locGroupName'});   // 
+            
+            columnasWorked.push({data: 'locType'}); // 
+            columnasWorked.push({data: 'posOperator'}); // 
+            columnasWorked.push({data: 'channel'}); // 
+            columnasWorked.push({data: 'posAddress'}); // 
+            columnasWorked.push({data: 'posTown'}); // 
+            
+            columnasWorked.push({data: 'latitude'}); // 
+            columnasWorked.push({data: 'longitude'}); // 
+            columnasWorked.push({data: 'posManager'}); // 
+            columnasWorked.push({data: 'posAssistant'}); // 
+            columnasWorked.push({data: 'posDealer'}); // 
+            
+            columnasWorked.push({data: 'posLocationCode'}); // 
+            
+            return columnasWorked;
+        }
+        
+        function getColumnasWorkedPosUser()
+        {
+            let columnasWorked = getColumnasWorkedBasicDefault();
+            
+            columnasWorked.push({data: 'creationDate'});
+            columnasWorked.push({data: 'routeTypeAssigned'});
+            columnasWorked.push({data: 'currentlyAssignedToName'});
+            // columnasWorked.push({data: 'currentlyAssignedStatus'});
+            columnasWorked.push({data: 'currentlyAssignedDate'});
+            
+            return columnasWorked;
+        }
+        
+        function getColumnasWorkedRouteAssistant()
+        {
+            let columnasWorked = getColumnasWorkedBasicDefault();
+    
+            columnasWorked.push({data: 'creationDate'});
+            columnasWorked.push({data: 'routeAssignedName'});
+            columnasWorked.push({data: 'routeTypeAssigned'});    // Tipo de recorrido
+    
+            columnasWorked.push({data: 'approvalAssignedDate'});
+            columnasWorked.push({data: 'routeAssistantName'});
+            columnasWorked.push({data: 'routeTypeAssistant'});     // Tipo de recorrido
+    
+            columnasWorked.push({data: 'currentlyAssignedToName'});
+            // columnasWorked.push({data: 'currentlyAssignedStatus'});
+            columnasWorked.push({data: 'currentlyAssignedDate'});
+            columnasWorked.push({data: 'currentlyAging'});
+    
+            return columnasWorked;
+        }
+        
+        function getColumnasWorkedRouteManager()
+        {
+            let columnasWorked = getColumnasWorkedBasicDefault();
+            // **************************************
+            // Encargado de recorrido
+            // **************************************
+            columnasWorked.push({data: 'creationDate'});
+            // aging Assigned
+            columnasWorked.push({data: 'agingRouteAssigned'});
+            columnasWorked.push({data: 'routeAssignedName'});
+            columnasWorked.push({data: 'routeTypeAssigned'});    //Tipo de recorrido
+            
+            // **************************************
+            // Asistente de recorrido
+            // **************************************
+            columnasWorked.push({data: 'approvalAssignedDate'});
+            // aging Assistant
+            columnasWorked.push({data: 'agingRouteAssistant'});
+            columnasWorked.push({data: 'routeAssistantName'});
+            columnasWorked.push({data: 'routeTypeAssistant'});     //Tipo de recorrido
+            
+            // **************************************
+            // Gerente de recorrido
+            // **************************************
+            columnasWorked.push({data: 'approvalAssistantDate'});
+            // aging Manager
+            columnasWorked.push({data: 'agingRouteManager'});
+            columnasWorked.push({data: 'routeManagerName'});
+            columnasWorked.push({data: 'routeTypeManager'});     //Tipo de recorrido
+            
+            // **************************************        
+            columnasWorked.push({data: 'currentlyAssignedToName'});
+            // columnasWorked.push({data: 'currentlyAssignedStatus'});
+            columnasWorked.push({data: 'currentlyAssignedDate'});
+            columnasWorked.push({data: 'currentlyAging'});
+            
+            return columnasWorked;
+        }
+        
+        function getColumnasWorkedPosAdmin()
+        {
+            let columnasWorked = [];
+            
+            columnasWorked.push({data: 'posLocationRouteID'}); // 
+            columnasWorked.push({data: 'posLocationID'}); //
+            columnasWorked.push({data: 'status'});    // 14
+            columnasWorked.push({data: 'posLocationInfo'}); // 
+            columnasWorked.push({data: 'locDescription'});   // 
+            columnasWorked.push({data: 'locGroupName'});   // 
+            
+            columnasWorked.push({data: 'locType'}); // 
+            columnasWorked.push({data: 'posOperator'}); // 
+            columnasWorked.push({data: 'channel'}); // 
+            columnasWorked.push({data: 'posAddress'}); // 
+            columnasWorked.push({data: 'posTown'}); // 
+            
+            columnasWorked.push({data: 'posZone'});
+            columnasWorked.push({data: 'posZoneDescription'});
+            columnasWorked.push({data: 'posDemographics'});
+            columnasWorked.push({data: 'posShareMktValue'});
+            
+            columnasWorked.push({data: 'latitude'}); // 
+            columnasWorked.push({data: 'longitude'}); // 
+            columnasWorked.push({data: 'posManager'}); // 
+            columnasWorked.push({data: 'posAssistant'}); // 
+            columnasWorked.push({data: 'posDealer'}); // 
+            columnasWorked.push({data: 'posLocationCode'}); // 20
+                    
+            // **************************************
+            // Encargado de recorrido
+            // **************************************
+            columnasWorked.push({data: 'creationDate'});
+            columnasWorked.push({data: 'agingRouteAssigned'});
+            columnasWorked.push({data: 'routeAssignedName'});
+            columnasWorked.push({data: 'routeTypeAssigned'});    // Tipo de recorrido
+            
+            // **************************************
+            // Asistente de recorrido
+            // **************************************
+            columnasWorked.push({data: 'approvalAssistantDate'});
+            columnasWorked.push({data: 'agingRouteAssistant'});
+            columnasWorked.push({data: 'routeAssistantName'});
+            columnasWorked.push({data: 'routeTypeAssistant'});     // Tipo de recorrido
+            
+            // **************************************
+            // Gerente de recorrido
+            // **************************************
+            columnasWorked.push({data: 'approvalManagerDate'});
+            columnasWorked.push({data: 'agingRouteManager'});
+            columnasWorked.push({data: 'routeManagerName'});
+            columnasWorked.push({data: 'routeTypeManager'});     //Tipo de recorrido
+                    
+            // ************************************** 
+            columnasWorked.push({data: 'currentlyAssignedDate'});
+            columnasWorked.push({data: 'currentlyAssignedToName'});
+            columnasWorked.push({data: 'currentlyAging'});
+            // columnasWorked.push({data: 'currentlyAssignedStatus'});
+            columnasWorked.push({data: 'cumplimiento'});
+            
+            return columnasWorked;
+        }
+        
+        function getColumnasWorked()
+        {
+            let columnasWorked = [];
+            if(useraccess.indexOf('POS_USER') > -1)
+            {
+                columnasWorked = getColumnasWorkedPosUser();            
+            }
+            else if (useraccess.indexOf('POS_LOC_ADMIN') > -1 )
+            {
+                if( !isManager ) //Asistente de recorrido
+                {
+                    columnasWorked = getColumnasWorkedRouteAssistant();
+                }
+                else if(isManager)
+                {
+                    columnasWorked = getColumnasWorkedRouteManager();
+                } 
+            } 
+            else if ( useraccess.indexOf('POS_ADMIN') > -1 )
+            {
+                columnasWorked = getColumnasWorkedPosAdmin();
+            }
+            columnsWorkedRoutesFile = columnasWorked;
+            return columnasWorked;
+        }*/
+ 
+
+ 
+
+ 

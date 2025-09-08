@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "281322845329",
+    "project_id": "iccclaroapp",
+    "storage_bucket": "iccclaroapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281322845329:android:c93f187a56ae43394abb30",
+        "android_client_info": {
+          "package_name": "claro.app.mobile.icc_claro_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN6Z73FUjnnBTJdext1l5KJVh1ffgwzJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

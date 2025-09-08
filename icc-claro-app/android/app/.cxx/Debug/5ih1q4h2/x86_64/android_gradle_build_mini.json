@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/home/janez/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/janez/Android/Sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/janez/isy/B\u0026F_Claro_app/icc_claro_app/android/app/.cxx/Debug/5ih1q4h2/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/janez/Android/Sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/janez/isy/B\u0026F_Claro_app/icc_claro_app/android/app/.cxx/Debug/5ih1q4h2/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
