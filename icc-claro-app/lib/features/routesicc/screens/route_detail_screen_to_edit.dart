@@ -125,7 +125,7 @@ class _RouteDetailScreenToEditState extends State<RouteDetailScreenToEdit> {
                             );
                           }).toList(),
                           onChanged: (value) {
-                            routeState.updatePosType(value);
+                            routeState.updatePosType(value, context);
                           },
                         ),
                         _buildDropdown(
@@ -138,7 +138,7 @@ class _RouteDetailScreenToEditState extends State<RouteDetailScreenToEdit> {
                             );
                           }).toList(),
                           onChanged: (value) {
-                            routeState.updateOperator(value);
+                            routeState.updateOperator(value, context);
                           },
                         ),
                         _buildDropdown(
@@ -180,7 +180,7 @@ class _RouteDetailScreenToEditState extends State<RouteDetailScreenToEdit> {
                                   selectedTown['zone'];
                               routeState.selectedPosZoneDesc =
                                   selectedTown['zoneDesc'];
-                              routeState.fetchTownDemographic(value!);
+                              routeState.fetchTownDemographic(value!, context);
                             });
                           },
                         ),
@@ -273,7 +273,7 @@ class _RouteDetailScreenToEditState extends State<RouteDetailScreenToEdit> {
                           onOptionSelected: (String value) {
                             routeState.selectedAgentCode = value;
                           },
-                          onTextChanged: routeState.fetchAgentCodes,
+                          onTextChanged: (String searchTerm) => routeState.fetchAgentCodes(searchTerm, context),
                         ),
                         CustomAutocomplete(
                           label: 'Código de Localidad',

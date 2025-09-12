@@ -15,28 +15,7 @@ import '../models/route_model.dart';
 import 'package:provider/provider.dart';
 import 'package:http_parser/http_parser.dart';
 
-//http://192.168.1.5:7001
-
 class RouteService {
-  // URLs usando ApiEndpoints centralizado
-  final String apiUrl = ApiEndpoints.buildUrl(ApiEndpoints.userRoutes);
-  final String apiFinishRouteBatch = ApiEndpoints.buildUrl(ApiEndpoints.finishRouteBatch);
-  final String apiInsertPosRoute = ApiEndpoints.buildUrl(ApiEndpoints.insertPosRoute);
-  final String apiApproveByAssistant = ApiEndpoints.buildUrl(ApiEndpoints.approveByAssistant);
-  final String apiApproveByManager = ApiEndpoints.buildUrl(ApiEndpoints.approveByManager);
-  final String apiReturnRouteToPosUser = ApiEndpoints.buildUrl(ApiEndpoints.returnRouteToPosUser);
-  final String apiCancelRoute = ApiEndpoints.buildUrl(ApiEndpoints.cancelRoute);
-  final String apiCloseRoute = ApiEndpoints.buildUrl(ApiEndpoints.closeRoute);
-  final String apiValidateRoute = ApiEndpoints.buildUrl(ApiEndpoints.validateRoute);
-  final String apiFindRouteComments = ApiEndpoints.buildUrl(ApiEndpoints.findRouteComments);
-  final String apiInsertRouteComment = ApiEndpoints.buildUrl(ApiEndpoints.insertRouteComment);
-  final String apiUpdateRouteComment = ApiEndpoints.buildUrl(ApiEndpoints.updateRouteComment);
-  final String apiFindRouteDocuments = ApiEndpoints.buildUrl(ApiEndpoints.findRouteDocuments);
-  final String apiInsertPosRouteDocuments = ApiEndpoints.buildUrl(ApiEndpoints.insertPosRouteDocuments);
-  final String apiGetRouteById = ApiEndpoints.buildUrl(ApiEndpoints.getRouteById);
-  final String apiDeleteRouteComment = ApiEndpoints.buildUrl(ApiEndpoints.deleteRouteComment);
-  final String apiDeleteRouteDocuments = ApiEndpoints.buildUrl(ApiEndpoints.deleteRouteDocuments);
-
   final client = HttpClient()
     ..badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
@@ -53,7 +32,7 @@ class RouteService {
         ApiEndpoints.userRoutes,
         queryParameters: {'username': username},
         context: context,
-        useCache: false, // No usar caché para obtener datos actualizados
+        useCache: false,
       );
 
       if (response.statusCode == 200) {
@@ -82,7 +61,8 @@ class RouteService {
 
         return dataList.map((item) => RouteModel.fromJson(item)).toList();
       } else {
-        throw Exception("Error al cargar datos. Código: ${response.statusCode}");
+        throw Exception(
+            "Error al cargar datos. Código: ${response.statusCode}");
       }
     } catch (e) {
       throw Exception("Error al cargar rutas: $e");
@@ -110,13 +90,15 @@ class RouteService {
 
       String endpoint;
       if (isPosUser) {
-        endpoint = ApiEndpoints.finishRouteBatch; // ✅ POS_USER valida recorrido
+        endpoint = ApiEndpoints.finishRouteBatch; 
       } else if (isLocAssistant) {
-        endpoint = ApiEndpoints.approveByAssistant; // ✅ Asistente aprueba POS_USER
+        endpoint =
+            ApiEndpoints.approveByAssistant;
       } else if (isLocAdmin) {
-        endpoint = ApiEndpoints.approveByManager; // ✅ Gerente valida al asistente
+        endpoint =
+            ApiEndpoints.approveByManager; 
       } else if (isAdmin) {
-        endpoint = ApiEndpoints.validateRoute; // ✅ Admin valida lo anterior
+        endpoint = ApiEndpoints.validateRoute;
       } else {
         throw Exception("Rol no autorizado para esta acción.");
       }
@@ -147,17 +129,15 @@ class RouteService {
         ApiEndpoints.getRouteById,
         queryParameters: {'routeId': routeId.toString()},
         context: context,
-        useCache: false, // No usar caché para obtener datos actualizados
+        useCache: false,
       );
 
       if (response.statusCode == 200) {
-        // Debug: imprimir la respuesta para troubleshooting
         print('🔍 Respuesta de getRouteById: ${response.body}');
 
         try {
           final Map<String, dynamic> jsonData = json.decode(response.body);
 
-          // Verificar que los campos requeridos estén presentes
           if (jsonData['posLocationID'] == null) {
             print('⚠️ posLocationID es null en la respuesta');
             throw Exception(
@@ -202,7 +182,7 @@ class RouteService {
           'userName': username,
         },
         context: context,
-        useCache: false, // No usar caché para obtener datos actualizados
+        useCache: false,
       );
 
       if (response.statusCode == 200) {
@@ -226,13 +206,14 @@ class RouteService {
       final response = await HttpAuthService.authenticatedPost(
         ApiEndpoints.insertRouteComment,
         body: {
-          "comment": comment,
-          "location": location,
-          "routeId": routeId,
-          "userName": userName,
+          "routeComment": comment,
+          "posLocId": location,
+          "posLocRouteId": routeId,
         },
         context: context,
       );
+
+      print('POST -> ${ApiEndpoints.insertRouteComment}');
 
       if (response.statusCode != 200) {
         throw Exception('Error al insertar comentario: ${response.body}');
@@ -365,17 +346,18 @@ class RouteService {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final accessToken = userProvider.accessToken;
 
-      final uri = Uri.parse(apiInsertPosRouteDocuments);
+      final uri = Uri.parse(ApiEndpoints.buildUrl(ApiEndpoints.insertPosRouteDocuments));
       final client = HttpClient()
         ..badCertificateCallback = (cert, host, port) => true;
 
       final request = await client.postUrl(uri);
-      
+
       // Agregar token de autenticación
       if (accessToken != null) {
-        request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
+        request.headers
+            .set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
       }
-      
+
       final boundary =
           '----dartFormBoundary${DateTime.now().millisecondsSinceEpoch}';
 
@@ -383,25 +365,26 @@ class RouteService {
           'multipart/form-data; boundary=$boundary');
       final multipartBody = BytesBuilder();
 
-    // Helper para agregar campos
-    void writeField(String name, String value) {
-      multipartBody.add(utf8.encode('--$boundary\r\n'));
-      multipartBody.add(
-          utf8.encode('Content-Disposition: form-data; name="$name"\r\n\r\n'));
-      multipartBody.add(utf8.encode('$value\r\n'));
-    }
+      // Helper para agregar campos
+      void writeField(String name, String value) {
+        multipartBody.add(utf8.encode('--$boundary\r\n'));
+        multipartBody.add(utf8
+            .encode('Content-Disposition: form-data; name="$name"\r\n\r\n'));
+        multipartBody.add(utf8.encode('$value\r\n'));
+      }
 
-    for (var file in files) {
-      final fileBytes = await File(file.path!).readAsBytes();
-      final mimeType = lookupMimeType(file.path!) ?? 'application/octet-stream';
+      for (var file in files) {
+        final fileBytes = await File(file.path!).readAsBytes();
+        final mimeType =
+            lookupMimeType(file.path!) ?? 'application/octet-stream';
 
-      multipartBody.add(utf8.encode('--$boundary\r\n'));
-      multipartBody.add(utf8.encode(
-          'Content-Disposition: form-data; name="files"; filename="${file.name}"\r\n'));
-      multipartBody.add(utf8.encode('Content-Type: $mimeType\r\n\r\n'));
-      multipartBody.add(fileBytes);
-      multipartBody.add(utf8.encode('\r\n'));
-    }
+        multipartBody.add(utf8.encode('--$boundary\r\n'));
+        multipartBody.add(utf8.encode(
+            'Content-Disposition: form-data; name="files"; filename="${file.name}"\r\n'));
+        multipartBody.add(utf8.encode('Content-Type: $mimeType\r\n\r\n'));
+        multipartBody.add(fileBytes);
+        multipartBody.add(utf8.encode('\r\n'));
+      }
 
       // Campos
       for (var file in files) {
@@ -444,17 +427,18 @@ class RouteService {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final accessToken = userProvider.accessToken;
 
-      final uri = Uri.parse(apiInsertPosRouteDocuments);
+      final uri = Uri.parse(ApiEndpoints.buildUrl(ApiEndpoints.insertPosRouteDocuments));
       final client = HttpClient()
         ..badCertificateCallback = (cert, host, port) => true;
 
       final request = await client.postUrl(uri);
-      
+
       // Agregar token de autenticación
       if (accessToken != null) {
-        request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
+        request.headers
+            .set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
       }
-      
+
       final boundary =
           '----dartFormBoundary${DateTime.now().millisecondsSinceEpoch}';
 
@@ -462,24 +446,24 @@ class RouteService {
           'multipart/form-data; boundary=$boundary');
       final multipartBody = BytesBuilder();
 
-    final fileBytes = await imageFile.readAsBytes();
-    final mimeType = lookupMimeType(imageFile.path) ?? 'image/jpeg';
+      final fileBytes = await imageFile.readAsBytes();
+      final mimeType = lookupMimeType(imageFile.path) ?? 'image/jpeg';
 
-    // 📎 Agregar archivo
-    multipartBody.add(utf8.encode('--$boundary\r\n'));
-    multipartBody.add(utf8.encode(
-        'Content-Disposition: form-data; name="files"; filename="${imageFile.name}"\r\n'));
-    multipartBody.add(utf8.encode('Content-Type: $mimeType\r\n\r\n'));
-    multipartBody.add(fileBytes);
-    multipartBody.add(utf8.encode('\r\n'));
-
-    // 📄 Campos adicionales
-    void writeField(String name, String value) {
+      // 📎 Agregar archivo
       multipartBody.add(utf8.encode('--$boundary\r\n'));
-      multipartBody.add(
-          utf8.encode('Content-Disposition: form-data; name="$name"\r\n\r\n'));
-      multipartBody.add(utf8.encode('$value\r\n'));
-    }
+      multipartBody.add(utf8.encode(
+          'Content-Disposition: form-data; name="files"; filename="${imageFile.name}"\r\n'));
+      multipartBody.add(utf8.encode('Content-Type: $mimeType\r\n\r\n'));
+      multipartBody.add(fileBytes);
+      multipartBody.add(utf8.encode('\r\n'));
+
+      // 📄 Campos adicionales
+      void writeField(String name, String value) {
+        multipartBody.add(utf8.encode('--$boundary\r\n'));
+        multipartBody.add(utf8
+            .encode('Content-Disposition: form-data; name="$name"\r\n\r\n'));
+        multipartBody.add(utf8.encode('$value\r\n'));
+      }
 
       writeField("fileNames", imageFile.name);
       writeField("fileDescriptions", "Foto desde camara");
@@ -625,7 +609,8 @@ class RouteService {
         useCache: false, // No usar caché para obtener datos actualizados
       );
 
-      print("🔍 fetchRouteByPosLocationId - Status Code: ${response.statusCode}");
+      print(
+          "🔍 fetchRouteByPosLocationId - Status Code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         print("🔍 fetchRouteByPosLocationId - Response Body: ${response.body}");
@@ -657,7 +642,8 @@ class RouteService {
 
         return RouteModel.fromJson(match);
       } else {
-        throw Exception("Error al cargar rutas. Código: ${response.statusCode}");
+        throw Exception(
+            "Error al cargar rutas. Código: ${response.statusCode}");
       }
     } catch (e) {
       throw Exception("Error al buscar ruta por posLocationId: $e");

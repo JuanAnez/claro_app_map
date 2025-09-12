@@ -34,12 +34,11 @@ class _PosContactsListState extends State<PosContactsList> {
     print('👥 Obteniendo contactos para posLocationId: $posLocationId');
     
     try {
-      // Usar HttpAuthService para manejar la autenticación correctamente
       final response = await HttpAuthService.authenticatedGet(
         ApiEndpoints.getAllPosContactsByLocation,
         queryParameters: {'posLocation': posLocationId.toString()},
         context: context,
-        useCache: true, // Usar caché para contactos
+        useCache: true,
       );
 
       print('👥 Status Code: ${response.statusCode}');

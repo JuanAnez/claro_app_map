@@ -30,7 +30,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
     final comment = _commentController.text.trim();
     if (comment.isEmpty) return;
 
-    Navigator.of(context).pop(); // Primero cerramos el diálogo
+    Navigator.of(context).pop();
 
     setState(() {
       _isLoading = true;
@@ -47,6 +47,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
         routeId: widget.routeId,
         userName: userName,
       );
+
+      print(  'Comentario enviado: $comment');
+      print(  'Ruta ID: ${widget.routeId}, Locación: ${widget.location}, Usuario: $userName');
 
       if (!mounted) return;
 

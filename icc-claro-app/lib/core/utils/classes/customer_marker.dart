@@ -199,22 +199,22 @@ class MarkerEntity {
           ),
         ),
         const SizedBox(width: 3),
-        if (hasAdminPermission(Provider.of<UserProvider>(context, listen: false)
-            .getUser()
-            ?.authorities))
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              showMallDialog(context, groupId);
-            },
-            style: _buildButtonStyle(const Color(0xFFb60000), Colors.white),
-            child: const Column(
-              children: [
-                Text('Inhabilitar'),
-                Text('Mall'),
-              ],
-            ),
-          ),
+        // if (hasAdminPermission(Provider.of<UserProvider>(context, listen: false)
+        //     .getUser()
+        //     ?.authorities))
+        //   ElevatedButton(
+        //     onPressed: () {
+        //       Navigator.of(context).pop();
+        //       showMallDialog(context, groupId);
+        //     },
+        //     style: _buildButtonStyle(const Color(0xFFb60000), Colors.white),
+        //     child: const Column(
+        //       children: [
+        //         Text('Inhabilitar'),
+        //         Text('Mall'),
+        //       ],
+        //     ),
+        //   ),
         const SizedBox(width: 3),
         ElevatedButton(
           onPressed: () {

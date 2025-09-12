@@ -389,7 +389,7 @@ class MapsRepository {
       final response = await HttpAuthService.authenticatedGet(
         ApiEndpoints.getPosLocDropdownInputs,
         context: context,
-        useCache: true, // Usar caché para dropdowns
+        useCache: true,
       );
 
       if (response.statusCode == 200) {
@@ -409,7 +409,7 @@ class MapsRepository {
         ApiEndpoints.getAllMatchPosDealers,
         queryParameters: {'searchTerm': searchTerm},
         context: context,
-        useCache: false, // No usar caché para búsquedas
+        useCache: false,
       );
 
       if (response.statusCode == 200) {
@@ -429,7 +429,7 @@ class MapsRepository {
         ApiEndpoints.getAllMatchPosFixedDealers,
         queryParameters: {'searchTerm': searchTerm},
         context: context,
-        useCache: false, // No usar caché para búsquedas
+        useCache: false,
       );
 
       if (response.statusCode == 200) {
@@ -449,7 +449,7 @@ class MapsRepository {
         ApiEndpoints.getTownDemographic,
         queryParameters: {'selectedTown': selectedTown},
         context: context,
-        useCache: true, // Usar caché para datos demográficos
+        useCache: true,
       );
 
       if (response.statusCode == 200) {
@@ -473,7 +473,7 @@ class MapsRepository {
           'selectedOperator': selectedOperator.toString(),
         },
         context: context,
-        useCache: true, // Usar caché para valores de market share
+        useCache: true,
       );
 
       if (response.statusCode == 200) {
@@ -492,7 +492,7 @@ class MapsRepository {
       final response = await HttpAuthService.authenticatedGet(
         ApiEndpoints.getTowns,
         context: context,
-        useCache: true, // Usar caché para lista de pueblos
+        useCache: true,
       );
 
       if (response.statusCode == 200) {
@@ -512,7 +512,7 @@ class MapsRepository {
         ApiEndpoints.getPosLocationsReferencesByTown,
         queryParameters: {'town': selectedTown},
         context: context,
-        useCache: true, // Usar caché para ubicaciones por pueblo
+        useCache: true,
       );
 
       if (response.statusCode == 200) {

@@ -101,7 +101,7 @@ class _CreateFormState extends State<CreateFormPos> {
                               );
                             }).toList(),
                             onChanged: (value) {
-                              formState.updatePosType(value);
+                              formState.updatePosType(value, context);
                             },
                           ),
                           _buildDropdown(
@@ -114,7 +114,7 @@ class _CreateFormState extends State<CreateFormPos> {
                               );
                             }).toList(),
                             onChanged: (value) {
-                              formState.updateOperator(value);
+                              formState.updateOperator(value, context);
                             },
                           ),
                           CustomTextField(
@@ -162,7 +162,7 @@ class _CreateFormState extends State<CreateFormPos> {
                                     selectedTown['zone'];
                                 formState.selectedPosZoneDesc =
                                     selectedTown['zoneDesc'];
-                                formState.fetchTownDemographic(value!);
+                                formState.fetchTownDemographic(value!, context);
                               });
                             },
                           ),
@@ -245,7 +245,8 @@ class _CreateFormState extends State<CreateFormPos> {
                             onOptionSelected: (String value) {
                               formState.selectedAgentCode = value;
                             },
-                            onTextChanged: formState.fetchAgentCodes,
+                            onTextChanged: (String searchTerm) =>
+                                formState.fetchAgentCodes(searchTerm, context),
                           ),
                           CustomAutocomplete(
                             label: 'Código de Agente (Fijo)',

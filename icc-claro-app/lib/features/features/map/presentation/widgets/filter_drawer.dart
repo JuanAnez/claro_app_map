@@ -1,6 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:icc_claro_app/core/config/api_endpoints.dart';
+import 'package:icc_claro_app/core/services/http_auth_service.dart';
 import 'package:icc_claro_app/core/widgets/loading_progress.dart';
 import 'dart:convert';
 
@@ -22,7 +22,7 @@ class _FilterDrawerState extends State<FilterDrawer> {
   @override
   void initState() {
     super.initState();
-    _dropdownInputsFuture = fetchDropdownInputs();
+    _dropdownInputsFuture = fetchDropdownInputs(context);
   }
 
   @override
@@ -39,30 +39,35 @@ class _FilterDrawerState extends State<FilterDrawer> {
     }
   }
 
-  Future<Map<String, dynamic>> fetchDropdownInputs() async {
-    final client = HttpClient()
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+  Future<Map<String, dynamic>> fetchDropdownInputs(BuildContext context) async {
+    final typesResp = await HttpAuthService.authenticatedGet(
+      ApiEndpoints.getPosLovByType,
+      queryParameters: {'lovType': 'POS_TYPE'},
+      context: context,
+    );
+    final opsResp = await HttpAuthService.authenticatedGet(
+      ApiEndpoints.getPosLovByType,
+      queryParameters: {'lovType': 'POS_OPERATOR'},
+      context: context,
+    );
 
-    final posTypesUrl = Uri.parse(
-        'https://webtest.prt.local/icc/api/getPosLovByType?lovType=POS_TYPE');
-    final posOperatorsUrl = Uri.parse(
-        'https://webtest.prt.local/icc/api/getPosLovByType?lovType=POS_OPERATOR');
+    final decodedTypes = jsonDecode(typesResp.body);
+    if (decodedTypes is! List) {
+      throw Exception(
+        'Esperaba lista para POS_TYPE. Status ${typesResp.statusCode}. Body: ${typesResp.body}',
+      );
+    }
 
-    final posTypesRequest = await client.getUrl(posTypesUrl);
-    final posTypesResponse = await posTypesRequest.close();
-    final posTypesBody = await posTypesResponse.transform(utf8.decoder).join();
-    final List posTypes = json.decode(posTypesBody);
-
-    final posOperatorsRequest = await client.getUrl(posOperatorsUrl);
-    final posOperatorsResponse = await posOperatorsRequest.close();
-    final posOperatorsBody =
-        await posOperatorsResponse.transform(utf8.decoder).join();
-    final List posOperators = json.decode(posOperatorsBody);
+    final decodedOps = jsonDecode(opsResp.body);
+    if (decodedOps is! List) {
+      throw Exception(
+        'Esperaba lista para POS_OPERATOR. Status ${opsResp.statusCode}. Body: ${opsResp.body}',
+      );
+    }
 
     return {
-      'allPosTypes': posTypes,
-      'allPosOperators': posOperators,
+      'allPosTypes': decodedTypes,
+      'allPosOperators': decodedOps,
     };
   }
 

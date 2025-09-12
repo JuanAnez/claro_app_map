@@ -131,24 +131,26 @@ class FormStateHandler extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updatePosType(String? newPosType) {
+  void updatePosType(String? newPosType, [BuildContext? context]) {
     selectedPosType = newPosType;
     notifyListeners();
     if (selectedPosType != null && selectedOperator != null) {
       fetchMarketShareValue(
         int.parse(selectedPosType!),
         int.parse(selectedOperator!),
+        context,
       );
     }
   }
 
-  void updateOperator(String? newOperator) {
+  void updateOperator(String? newOperator, [BuildContext? context]) {
     selectedOperator = newOperator;
     notifyListeners();
     if (selectedPosType != null && selectedOperator != null) {
       fetchMarketShareValue(
         int.parse(selectedPosType!),
         int.parse(selectedOperator!),
+        context,
       );
     }
   }
@@ -215,11 +217,11 @@ class FormStateHandler extends ChangeNotifier {
   }
 
   Future<void> fetchMarketShareValue(
-      int selectedType, int selectedOperator) async {
+      int selectedType, int selectedOperator, [BuildContext? context]) async {
     try {
       MapsRepository client = MapsRepository();
       MessageResponse response =
-          await client.getMarketShareValue(selectedType, selectedOperator);
+          await client.getMarketShareValue(selectedType, selectedOperator, context);
 
       if (response.ok) {
         double? marketShareDouble =
@@ -242,10 +244,10 @@ class FormStateHandler extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchTownDemographic(String selectedTown) async {
+   Future<void> fetchTownDemographic(String selectedTown, [BuildContext? context]) async {
     try {
       MapsRepository client = MapsRepository();
-      MessageResponse response = await client.getTownDemographic(selectedTown);
+      MessageResponse response = await client.getTownDemographic(selectedTown, context);
       if (response.ok) {
         townDemographicValue = response.content.toString();
         townDemographicController.text = townDemographicValue ?? '';
@@ -258,11 +260,11 @@ class FormStateHandler extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchAgentCodes(String searchTerm) async {
+  Future<void> fetchAgentCodes(String searchTerm, [BuildContext? context]) async {
     try {
       MapsRepository client = MapsRepository();
 
-      MessageResponse response = await client.getAgentCode(searchTerm);
+      MessageResponse response = await client.getAgentCode(searchTerm, context);
       if (response.ok) {
         List<String> agentCodes = (response.content as List).map((agent) {
           final dealerCode =
