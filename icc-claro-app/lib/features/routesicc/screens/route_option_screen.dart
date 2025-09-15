@@ -16,6 +16,7 @@ import 'package:icc_claro_app/features/routesicc/screens/route_screen.dart';
 import 'package:icc_claro_app/features/routesicc/services/close_route.dart';
 import 'package:icc_claro_app/features/routesicc/services/route_service.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 class RouteOptionsScreen extends StatefulWidget {
   final RouteModel route;
@@ -64,6 +65,12 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
     currentRoute = widget.route;
   }
 
+  @override
+  void dispose() {
+    _exitImmersive();
+    super.dispose();
+  }
+
   bool isFieldEdited(String fieldName) {
     return currentRoute.modifiedFields != null &&
         currentRoute.modifiedFields![fieldName] == true;
@@ -72,33 +79,37 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
   Future<void> _fetchRouteById() async {
     try {
       final routeService = RouteService();
-      final updatedRoute =
-          await routeService.fetchRouteById(currentRoute.posLocationRouteID, context: context);
+      final updatedRoute = await routeService
+          .fetchRouteById(currentRoute.posLocationRouteID, context: context);
 
       setState(() {
         currentRoute = updatedRoute;
       });
     } catch (e) {
       print('Error al actualizar el recorrido: $e');
-      
+
       // Mostrar mensaje de error al usuario
       if (mounted) {
         String errorMessage = 'Error al actualizar el recorrido';
-        
-        if (e.toString().contains('401') || e.toString().contains('Token de autenticación expirado')) {
-          errorMessage = 'Sesión expirada. Por favor, inicie sesión nuevamente.';
+
+        if (e.toString().contains('401') ||
+            e.toString().contains('Token de autenticación expirado')) {
+          errorMessage =
+              'Sesión expirada. Por favor, inicie sesión nuevamente.';
           // Redirigir al login después de un delay
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
-              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/login', (route) => false);
             }
           });
         } else if (e.toString().contains('posLocationID no encontrado')) {
-          errorMessage = 'Error en los datos del recorrido. Contacte al administrador.';
+          errorMessage =
+              'Error en los datos del recorrido. Contacte al administrador.';
         } else if (e.toString().contains('403')) {
           errorMessage = 'No tienes permisos para acceder a este recorrido.';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -117,230 +128,252 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
     return value.toString();
   }
 
+  void _enterImmersive() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  void _exitImmersive() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+
+  Future<T?> _withLoader<T>(Future<T> Function() task) async {
+    if (mounted) setState(() => _isLoading = true);
+    _enterImmersive();
+    try {
+      return await task();
+    } finally {
+      _exitImmersive();
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.blueGrey[900],
-        title: const Text(
-          "Información de Recorrido",
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showMarkerDetails(
-                context,
-                widget.location ?? <String, dynamic>{},
-                widget.onReload ?? () {},
-                routeModel: currentRoute,
-              );
-            });
-          },
-        ),
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.blueGrey[900],
+            title: const Text("Información de Recorrido",
+                style: TextStyle(color: Colors.white)),
+            centerTitle: true,
+            iconTheme: const IconThemeData(color: Colors.white),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  showMarkerDetails(
+                    context,
+                    widget.location ?? <String, dynamic>{},
+                    widget.onReload ?? () {},
+                    routeModel: currentRoute,
+                  );
+                });
+              },
+            ),
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ID Recorrido: ${currentRoute.posLocationRouteID}',
-                      style: TextStyle(
-                        color: isFieldEdited('posLocationRouteID')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ID Recorrido: ${currentRoute.posLocationRouteID}',
+                          style: TextStyle(
+                            color: isFieldEdited('posLocationRouteID')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'ID POS: ${currentRoute.posLocationID}',
+                          style: TextStyle(
+                            color: isFieldEdited('posLocationID')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Status: ${currentRoute.status}',
+                          style: TextStyle(
+                            color: isFieldEdited('status')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'POS Info: ${currentRoute.posLocationName}',
+                          style: TextStyle(
+                            color: isFieldEdited('posLocationName')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                        Text(
+                          'Ubicación: ${currentRoute.description ?? currentRoute.locDescription}',
+                          style: TextStyle(
+                            color: isFieldEdited('locDescription')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Centro Comercial: ${safeValue(currentRoute.locGroupName)}',
+                          style: TextStyle(
+                            color: isFieldEdited('locGroupName')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Tipo: ${currentRoute.locType}',
+                          style: TextStyle(
+                            color: isFieldEdited('locType')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Operador: ${currentRoute.posOperator}',
+                          style: TextStyle(
+                            color: isFieldEdited('posOperator')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Canal: ${currentRoute.channel}',
+                          style: TextStyle(
+                            color: isFieldEdited('channelId')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Direccion: ${currentRoute.posAddress}',
+                          style: TextStyle(
+                            color: isFieldEdited('posAddress')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                        Text(
+                          'Pueblo: ${currentRoute.posTown}',
+                          style: TextStyle(
+                            color: isFieldEdited('posTown')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Zona: ${currentRoute.posZone}',
+                          style: TextStyle(
+                            color: isFieldEdited('posZone')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Desc/Zona: ${currentRoute.posZoneDescription}',
+                          style: TextStyle(
+                            color: isFieldEdited('posZoneDescription')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Demografico: ${currentRoute.posDemographics}',
+                          style: TextStyle(
+                            color: isFieldEdited('posDemographics')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Puntuacion: ${currentRoute.posShareMktValue}',
+                          style: TextStyle(
+                            color: isFieldEdited('posShareMktValue')
+                                ? Colors.orange
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'ID POS: ${currentRoute.posLocationID}',
-                      style: TextStyle(
-                        color: isFieldEdited('posLocationID')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Status: ${currentRoute.status}',
-                      style: TextStyle(
-                        color: isFieldEdited('status')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'POS Info: ${currentRoute.posLocationName}',
-                      style: TextStyle(
-                        color: isFieldEdited('posLocationName')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 15,
-                      ),
-                    ),
-                    Text(
-                      'Ubicación: ${currentRoute.description ?? currentRoute.locDescription}',
-                      style: TextStyle(
-                        color: isFieldEdited('locDescription')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Centro Comercial: ${safeValue(currentRoute.locGroupName)}',
-                      style: TextStyle(
-                        color: isFieldEdited('locGroupName')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Tipo: ${currentRoute.locType}',
-                      style: TextStyle(
-                        color: isFieldEdited('locType')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Operador: ${currentRoute.posOperator}',
-                      style: TextStyle(
-                        color: isFieldEdited('posOperator')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Canal: ${currentRoute.channel}',
-                      style: TextStyle(
-                        color: isFieldEdited('channelId')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Direccion: ${currentRoute.posAddress}',
-                      style: TextStyle(
-                        color: isFieldEdited('posAddress')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 15,
-                      ),
-                    ),
-                    Text(
-                      'Pueblo: ${currentRoute.posTown}',
-                      style: TextStyle(
-                        color: isFieldEdited('posTown')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Zona: ${currentRoute.posZone}',
-                      style: TextStyle(
-                        color: isFieldEdited('posZone')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Desc/Zona: ${currentRoute.posZoneDescription}',
-                      style: TextStyle(
-                        color: isFieldEdited('posZoneDescription')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Demografico: ${currentRoute.posDemographics}',
-                      style: TextStyle(
-                        color: isFieldEdited('posDemographics')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Puntuacion: ${currentRoute.posShareMktValue}',
-                      style: TextStyle(
-                        color: isFieldEdited('posShareMktValue')
-                            ? Colors.orange
-                            : Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.7),
-              child: const Center(
-                child: LoadingProgress(),
-              ),
-            ),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          color: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < 500;
-              return isNarrow
-                  ? Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 8,
-                      runSpacing: 8,
-                      children:
-                          _buildButtons(context, widget.route, widget.roles),
-                    )
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:
-                            _buildButtons(context, widget.route, widget.roles)
+          ),
+          bottomNavigationBar: SafeArea(
+            child: Container(
+              color: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 500;
+                  return isNarrow
+                      ? Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _buildButtons(
+                              context, widget.route, widget.roles),
+                        )
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _buildButtons(
+                                    context, widget.route, widget.roles)
                                 .map((btn) => Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 6),
                                       child: btn,
                                     ))
                                 .toList(),
-                      ),
-                    );
-            },
+                          ),
+                        );
+                },
+              ),
+            ),
           ),
         ),
-      ),
+        if (_isLoading)
+          const Positioned.fill(
+            child: AbsorbPointer(
+              absorbing: true,
+              child: ColoredBox(color: Color(0x61000000)),
+            ),
+          ),
+        if (_isLoading)
+          const Positioned.fill(
+            child: IgnorePointer(child: Center(child: LoadingProgress())),
+          ),
+      ],
     );
   }
 
@@ -418,8 +451,7 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
     final username = user?.username ?? '';
     final isManager = _isManagerRole(route, roles, username);
     final isAssistant = _isAssistantRole(route, roles, username);
-    
-    // Debug logging
+
     print('🔍 Debug _buildButtons:');
     print('  - Username: $username');
     print('  - Roles: $roles');
@@ -583,7 +615,8 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
       addCommonButtons();
     }
 
-    if ((isLocAdmin || isLocAssistant) && widget.routeType == 'incomingRoutes') {
+    if ((isLocAdmin || isLocAssistant) &&
+        widget.routeType == 'incomingRoutes') {
       if (isManager || isAssistant) {
         addButtonHoriz(
           'Editar\nRecorrido',
@@ -698,8 +731,8 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
 
             if (result == true) {
               final routeService = RouteService();
-              final updatedRoute =
-                  await routeService.fetchRouteById(route.posLocationRouteID, context: context);
+              final updatedRoute = await routeService
+                  .fetchRouteById(route.posLocationRouteID, context: context);
 
               setState(() {
                 route = updatedRoute;
@@ -859,7 +892,7 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
                 context, "Advertencia", "Este recorrido ya ha sido cancelado.");
             return;
           }
-          
+
           setState(() {
             _isLoading = true;
           });
@@ -879,7 +912,6 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
             setState(() {
               _isApproved = true;
             });
-            // _showCustomDialog(context, "Éxito", result);
             _showSuccessSnackBar(context,
                 message: 'Recorrido cancelado correctamente.');
           } catch (e) {
@@ -900,7 +932,7 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
                 context, "Advertencia", "Este recorrido ya ha sido cerrado.");
             return;
           }
-          
+
           setState(() {
             _isLoading = true;
           });
@@ -920,7 +952,6 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
             setState(() {
               _isApproved = true;
             });
-            // _showCustomDialog(context, "Éxito", result);
             _showSuccessSnackBar(context,
                 message: 'Punto de venta cerrado correctamente.');
           } catch (e) {
@@ -1013,9 +1044,9 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
           );
 
           if (result == true) {
-                          final routeService = RouteService();
-              final updatedRoute =
-                  await routeService.fetchRouteById(route.posLocationRouteID, context: context);
+            final routeService = RouteService();
+            final updatedRoute = await routeService
+                .fetchRouteById(route.posLocationRouteID, context: context);
 
             setState(() {
               route = updatedRoute;

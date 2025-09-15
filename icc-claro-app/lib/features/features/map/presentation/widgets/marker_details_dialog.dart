@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:icc_claro_app/core/utils/helpers/immersive_loader.dart';
+import 'package:icc_claro_app/core/widgets/loading_progress.dart';
 // import 'package:icc_claro_app/core/utils/buttons/alert_button.dart';
 import 'package:icc_claro_app/core/widgets/pos_contacts_list.dart';
 import 'package:icc_claro_app/core/widgets/pos_files_list.dart';
@@ -132,10 +134,13 @@ void showMarkerDetails(
                           posLocationId: posLocationId,
                         ),
                         builder: (context, snapshot) {
-                          print("🔍 marker_details_dialog - FutureBuilder estado: ${snapshot.connectionState}");
-                          print("🔍 marker_details_dialog - FutureBuilder data: ${snapshot.data}");
-                          print("🔍 marker_details_dialog - FutureBuilder error: ${snapshot.error}");
-                          
+                          print(
+                              "🔍 marker_details_dialog - FutureBuilder estado: ${snapshot.connectionState}");
+                          print(
+                              "🔍 marker_details_dialog - FutureBuilder data: ${snapshot.data}");
+                          print(
+                              "🔍 marker_details_dialog - FutureBuilder error: ${snapshot.error}");
+
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const CircularProgressIndicator(
@@ -144,31 +149,37 @@ void showMarkerDetails(
                           }
 
                           final matchRoute = snapshot.data;
-                          print("🔍 marker_details_dialog - matchRoute: $matchRoute");
+                          print(
+                              "🔍 marker_details_dialog - matchRoute: $matchRoute");
 
                           if (matchRoute == null) {
-                            print("🔍 marker_details_dialog - No hay recorrido para posLocationId: $posLocationId");
+                            print(
+                                "🔍 marker_details_dialog - No hay recorrido para posLocationId: $posLocationId");
                             return const SizedBox();
                           }
 
                           return ElevatedButton(
                             style: _buildButtonStyle(),
                             onPressed: () async {
+                              final rootNav =
+                                  Navigator.of(context, rootNavigator: true);
+
                               try {
-                                final user =
-                                    context.read<UserProvider>().getUser();
-                                final roles =
-                                    getRolesFromAuthorities(user?.authorities);
-                                print("🔍 marker_details_dialog - roles: $roles");
-                                final updatedRoute = await RouteService()
-                                    .fetchRouteById(
-                                        matchRoute.posLocationRouteID, context: context);
+                                // Cierra el dialog del marker antes de navegar
+                                if (rootNav.canPop()) rootNav.pop();
 
-                                if (!context.mounted) return;
+                                await withImmersiveLoader(context, () async {
+                                  final user =
+                                      context.read<UserProvider>().getUser();
+                                  final roles = getRolesFromAuthorities(
+                                      user?.authorities);
 
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
+                                  final updatedRoute = await RouteService()
+                                      .fetchRouteById(
+                                          matchRoute.posLocationRouteID,
+                                          context: context);
+
+                                  await rootNav.push(MaterialPageRoute(
                                     builder: (_) => RouteOptionsScreen(
                                       route: updatedRoute,
                                       roles: roles,
@@ -176,19 +187,14 @@ void showMarkerDetails(
                                       location: location,
                                       onReload: onReload,
                                     ),
-                                  ),
-                                );
-
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
+                                  ));
+                                });
                               } catch (e) {
                                 if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          "Error al cargar recorrido: $e")),
-                                );
+                                    SnackBar(
+                                        content: Text(
+                                            "Error al cargar recorrido: $e")));
                               }
                             },
                             child: const Column(
@@ -238,7 +244,7 @@ void showReasonDialog(
 
 void _showHistorialDialog(BuildContext context, int posLocationId) async {
   print('📋 Obteniendo historial para posLocationId: $posLocationId');
-  
+
   try {
     // Usar HttpAuthService para manejar la autenticación correctamente
     final response = await HttpAuthService.authenticatedGet(
@@ -344,14 +350,15 @@ void _showHistorialDialog(BuildContext context, int posLocationId) async {
     } else {
       print('❌ Error al cargar los datos: ${response.statusCode}');
       print('   Respuesta del servidor: ${response.body}');
-      
+
       // Mostrar mensaje de error al usuario
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Error'),
-            content: Text('Error al cargar el historial: ${response.statusCode}'),
+            content:
+                Text('Error al cargar el historial: ${response.statusCode}'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -364,13 +371,13 @@ void _showHistorialDialog(BuildContext context, int posLocationId) async {
     }
   } catch (e) {
     print('❌ Excepción al obtener el historial: $e');
-    
+
     // Manejar errores específicos de autenticación
-    if (e.toString().contains('Token expirado') || 
+    if (e.toString().contains('Token expirado') ||
         e.toString().contains('No autorizado')) {
       print('🔑 Error de autenticación detectado en historial');
     }
-    
+
     // Mostrar mensaje de error al usuario
     showDialog(
       context: context,

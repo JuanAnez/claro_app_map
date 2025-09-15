@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:icc_claro_app/core/utils/helpers/get_roles.dart';
+import 'package:icc_claro_app/core/utils/helpers/immersive_loader.dart';
 import 'package:icc_claro_app/core/widgets/loading_progress.dart';
 import 'package:icc_claro_app/features/authentication/users/user_provider.dart';
 import 'package:icc_claro_app/features/routesicc/screens/route_detail_create_screen.dart';
@@ -264,6 +265,10 @@ class _RouteScreenState extends State<RouteScreen> {
               ),
             ],
           ),
+          if (_isLoading)
+            const ModalBarrier(
+              dismissible: false,
+            ),
           if (_isLoading) const Center(child: LoadingProgress()),
           if (widget.routeType == 'openRoutes' && roles.contains('POS_USER'))
             Positioned(
@@ -495,56 +500,39 @@ class _RouteScreenState extends State<RouteScreen> {
     final roles = getRolesFromAuthorities(user?.authorities);
 
     try {
-      // Mostrar loader
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const LoadingProgress(),
-      );
+      await withImmersiveLoader(context, () async {
+        final updatedRoute = await _routeService
+            .fetchRouteById(route.posLocationRouteID, context: context);
 
-      final updatedRoute =
-          await _routeService.fetchRouteById(route.posLocationRouteID, context: context);
-          
-
-      // Cierra el loader si aún montado
-      if (mounted) Navigator.of(context).pop();
-
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RouteOptionsScreen(
-            route: updatedRoute,
-            roles: roles,
-            routeType: widget.routeType,
+        await Navigator.of(context, rootNavigator: true).push(
+          MaterialPageRoute(
+            builder: (_) => RouteOptionsScreen(
+              route: updatedRoute,
+              roles: roles,
+              routeType: widget.routeType,
+            ),
           ),
-        ),
-      );
+        );
+      });
 
-      if (result == true && mounted) {
-        setState(() {
-          _isLoading = true;
-        });
+      if (mounted) {
+        setState(() => _isLoading = true);
         await _fetchRoutes();
       }
     } catch (e) {
-      if (mounted) Navigator.of(context).pop();
-      
+      if (!mounted) return;
+
       String errorMessage = "No se pudo cargar el recorrido actualizado";
-      
-      if (e.toString().contains('401') || e.toString().contains('Token de autenticación expirado')) {
+      if (e.toString().contains('401') ||
+          e.toString().contains('Token de autenticación expirado')) {
         errorMessage = "Sesión expirada. Por favor, inicie sesión nuevamente.";
-        // Redirigir al login
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-          }
-        });
       } else if (e.toString().contains('posLocationID no encontrado')) {
-        errorMessage = "Error en los datos del recorrido. Contacte al administrador.";
+        errorMessage =
+            "Error en los datos del recorrido. Contacte al administrador.";
       } else if (e.toString().contains('403')) {
         errorMessage = "No tienes permisos para acceder a este recorrido.";
       }
-      
+
       _showDialog(context, "Error", errorMessage);
     }
   }
