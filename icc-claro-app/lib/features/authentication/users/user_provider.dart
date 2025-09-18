@@ -1,10 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:icc_claro_app/features/authentication/data/models/user_model.dart';
+import 'package:icc_claro_app/features/authentication/data/models/me_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decode/jwt_decode.dart';
+import 'package:icc_claro_app/core/services/http_auth_service.dart';
+import 'package:icc_claro_app/core/config/api_endpoints.dart';
+import 'dart:convert';
 
 class UserProvider extends ChangeNotifier {
   UserModel? _user;
+  Me? _me;
   String? _accessToken;
   final Duration _timeAdjustment = const Duration();
   // final Duration _timeAdjustment = const Duration(hours: -1, minutes: -36);
@@ -16,6 +21,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   UserModel? getUser() => _user;
+  Me? get me => _me;
 
   void saveAccessToken(String token) {
     _accessToken = token;
@@ -113,6 +119,40 @@ class UserProvider extends ChangeNotifier {
       print('   Hora actual: ${now.toIso8601String()}');
       print('   Expira en: ${expirationDate.toIso8601String()}');
       print('   Duración total: ${duration.inSeconds} segundos (${duration.inMinutes} minutos)');
+    }
+  }
+
+  Future<void> loadMe(BuildContext context) async {
+    try {
+      // Solo intentar cargar si hay token
+      if (_accessToken == null) {
+        print('⚠️ No hay token disponible para loadMe');
+        return;
+      }
+
+      final response = await HttpAuthService.authenticatedGet(
+        ApiEndpoints.me,
+        context: context,
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        
+        // Verificar la estructura de respuesta del backend
+        if (jsonData['status'] == 200 && jsonData['code'] == 'OK' && jsonData['data'] != null) {
+          _me = Me.fromJson(jsonData['data']);
+          notifyListeners();
+          print('✅ Usuario cargado desde /me: ${_me?.username} (ID: ${_me?.userId})');
+        } else {
+          print('❌ Respuesta del backend no válida: $jsonData');
+        }
+      } else {
+        print('❌ Error cargando usuario: ${response.statusCode}');
+        // No lanzar excepción, solo loggear el error
+      }
+    } catch (e) {
+      print('❌ Excepción cargando usuario: $e');
+      // No lanzar excepción, solo loggear el error
     }
   }
 }

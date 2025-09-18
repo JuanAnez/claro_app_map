@@ -15,6 +15,7 @@ import 'package:icc_claro_app/core/services/http_auth_service.dart';
 import 'package:icc_claro_app/features/routesicc/models/route_model.dart';
 import 'package:provider/provider.dart';
 import 'package:turf/turf.dart';
+import 'package:icc_claro_app/core/config/api_endpoints.dart';
 
 class RouteStateHandler extends ChangeNotifier {
   bool _isSubmitting = false;
@@ -209,6 +210,68 @@ class RouteStateHandler extends ChangeNotifier {
   void setSubmitting(bool submitting) {
     _isSubmitting = submitting;
     notifyListeners();
+  }
+
+  // Helper para castear ints del JSON
+  int _asInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is double) return v.toInt();
+    return int.tryParse(v.toString()) ?? 0;
+  }
+
+  // Obtener defaults desde /getPosLocationsInfo
+  Future<Map<String,int>> _resolveRouteIds(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final me = userProvider.me; // asegúrate de haber llamado loadMe()
+    if (me == null) throw Exception('Usuario no cargado');
+
+    print('🔍 Resolviendo IDs para usuario: ${me.username} (ID: ${me.userId})');
+
+    final list = await _fetchPosLocations(context); // ya lo tienes
+
+    // Busca la PRIMERA fila donde routeAssignedId == me.userId
+    Map<String, dynamic>? match;
+    for (final e in list) {
+      final m = e as Map<String, dynamic>;
+      if (_asInt(m['routeAssignedId']) == me.userId) {
+        match = m; 
+        print('✅ Match encontrado para userId: ${me.userId}');
+        break;
+      }
+    }
+
+    // Si no hay match, puedes quedarte con 0 o elegir otra heurística
+    final managerId   = match != null ? _asInt(match['routeManagerId'])   : 0;
+    final assistantId = match != null ? _asInt(match['routeAssistantId']) : 0;
+
+    print('📋 IDs resueltos: assigned=${me.userId}, manager=$managerId, assistant=$assistantId');
+
+    return {
+      'assigned': me.userId,        // el propio usuario
+      'manager': managerId,
+      'assistant': assistantId,
+    };
+  }
+
+  Future<List<dynamic>> _fetchPosLocations(BuildContext context) async {
+    try {
+      final response = await HttpAuthService.authenticatedGet(
+        ApiEndpoints.getPosLocationsInfo,
+        context: context,
+        useCache: true,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonApi = jsonDecode(response.body);
+        return jsonApi;
+      } else {
+        throw Exception("Error en API: Código ${response.statusCode}");
+      }
+    } catch (e) {
+      print("❌ Error en _fetchPosLocations: $e");
+      rethrow;
+    }
   }
 
   void updatePosDesc(String? newPosDesc) {
@@ -466,12 +529,21 @@ class RouteStateHandler extends ChangeNotifier {
 
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userName = userProvider.getUser()?.username ?? "DEFAULT_USERNAME";
+      if (userProvider.me == null) {
+        await userProvider.loadMe(context); // asegúrate de tener el userId
+      }
+
+      // 1) Defaults desde /getPosLocationsInfo comparando con mi userId
+      final ids = await _resolveRouteIds(context);
+      final managerId   = ids['manager'] ?? 0;
+      final assistantId = ids['assistant'] ?? 0;
+      final assignedId  = ids['assigned'] ?? 0;
 
       final dropdownDataLoader =
           Provider.of<DropdownDataLoader>(context, listen: false);
       posDescriptions = dropdownDataLoader.posDescriptions;
 
+      // 2) Construye el payload (si 'route' viene, tiene prioridad)
       final newPosLocation = PosLocationRoute(
         posLocName: nombreController.text,
         posLocDesc: getDescriptionFromId(selectedPosDesc) ?? '',
@@ -493,35 +565,29 @@ class RouteStateHandler extends ChangeNotifier {
             selectedAsistente?.isNotEmpty == true ? selectedAsistente : "",
         posDealer: selectedAgentCode?.split(' - ')[0] ?? "",
         posLocationCode: selectedPosRmsLocations?.split(' - ')[0] ?? "",
-        userName: userName,
-        routeManagerId: route?.routeManagerId ?? 0,
-        routeAssistantId: route?.routeAssistantId ?? 0,
-        routeAssignedId: route?.routeAssignedId ?? 0,
+        userName: userProvider.getUser()?.username ?? "DEFAULT_USERNAME",
+        routeManagerId: route?.routeManagerId ?? managerId,
+        routeAssistantId: route?.routeAssistantId ?? assistantId,
+        routeAssignedId: route?.routeAssignedId ?? assignedId,
         posLocationRouteId: null,
         posLocationId: null,
       );
 
-      print(
-          "Ruta seleccionada: ${route?.routeManagerId}, ${route?.routeAssistantId}, ${route?.routeAssignedId}");
+      print("Ruta seleccionada: ${newPosLocation.routeManagerId}, "
+            "${newPosLocation.routeAssistantId}, ${newPosLocation.routeAssignedId}");
 
       final jsonData = newPosLocation.toJson();
       print('JSON enviado: $jsonData');
+
       await postInsertPosRoute(context, jsonData, onReload);
-      // resetForm(context);
       setSubmitting(false);
-
-      // await showSuccessDialog(
-      //   context,
-      //   message: 'El punto de venta se ha añadido correctamente',
-      // );
-
       showSuccessSnackBar(
         context,
         message: 'El punto de venta se ha añadido correctamente',
         onReload: onReload,
       );
-    } catch (error) {
-      print('Error durante el envío: $error');
+    } catch (e) {
+      print('Error durante el envío: $e');
       showErrorDialog(context, 'Error durante el envío de los datos.');
       setSubmitting(false);
     }

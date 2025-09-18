@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:icc_claro_app/core/utils/buttons/alert_button.dart';
 import 'package:icc_claro_app/core/utils/classes/custom_polygon.dart';
 import 'package:icc_claro_app/core/utils/classes/disable_pos_location.dart';
+import 'package:icc_claro_app/core/widgets/loading_progress.dart';
 import 'package:icc_claro_app/core/widgets/show_pos_suggestions_dialog.dart';
 import 'package:icc_claro_app/data/models/payload/message_response.dart';
 import 'package:icc_claro_app/features/authentication/users/user_provider.dart';
@@ -468,153 +469,161 @@ class MapProvider with ChangeNotifier {
     }
   }
 
-  Future<void> showMarketShareDialog(BuildContext context, String town) async {
-    try {
-      MapsRepository client = MapsRepository();
-      MessageResponse response = await client.getMarketShareForTown(town, context);
-      if (response.ok) {
-        final marketShare = response.content;
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Container(
-                      width: 300,
-                      padding: const EdgeInsets.only(
-                          right: 30, left: 30, top: 30, bottom: 30),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(4)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Text(
-                              town.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            "Participación de Mercado",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildMarketShareRow(
-                              "Fijo: ",
-                              marketShare['posTownMarketValue']['somFijo'] ??
-                                  '0.00%',
-                              Colors.white,
-                              Colors.red),
-                          _buildMarketShareRow(
-                              "Móvil: ",
-                              marketShare['posTownMarketValue']['somMovil'] ??
-                                  '0.00%',
-                              Colors.white,
-                              Colors.red),
-                          const SizedBox(height: 16),
-                          const Text(
-                            "Presencia Física",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          ...marketShare['marketShareDetails']
-                              .map<Widget>((detail) {
-                            final marketShareMap =
-                                parseCustomJSON(detail['marketShareJSON']);
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildMarketShareRow(
-                                    "${detail['localidad']}: ",
-                                    detail['porcientoParticipacion'],
-                                    localidadColors[detail['localidad']] ??
-                                        Colors.white,
-                                    localidadColors[detail['localidad']] ??
-                                        Colors.white),
-                                ...marketShareMap.entries.map((entry) {
-                                  return Text(
-                                    "• ${entry.key}: ${entry.value}",
-                                    style: const TextStyle(color: Colors.white),
-                                  );
-                                }),
-                                const SizedBox(height: 8),
-                              ],
-                            );
-                          }).toList(),
-                          const SizedBox(height: 8),
-                          Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: const Color(0xFFb60000),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 16.0),
-                                  ),
-                                  child: const Text('Cerrar'),
-                                ),
-                                const SizedBox(width: 10),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    fetchAndShowSuggestions(context, town);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.blue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 16.0),
-                                  ),
-                                  child: const Text('Sugerencia de POS'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+Future<void> showMarketShareDialog(BuildContext context, String town) async {
+  try {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LoadingProgress(),
+    );
+
+    MapsRepository client = MapsRepository();
+    MessageResponse response =
+        await client.getMarketShareForTown(town, context);
+    Navigator.of(context).pop();
+
+    if (response.ok) {
+      final marketShare = response.content;
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Center(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Container(
+                    width: 300,
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: const BorderRadius.all(Radius.circular(4)),
                     ),
-                  ],
-                ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            town.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Participación de Mercado",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildMarketShareRow(
+                          "Fijo: ",
+                          marketShare['posTownMarketValue']['somFijo'] ??
+                              '0.00%',
+                          Colors.white,
+                          Colors.red,
+                        ),
+                        _buildMarketShareRow(
+                          "Móvil: ",
+                          marketShare['posTownMarketValue']['somMovil'] ??
+                              '0.00%',
+                          Colors.white,
+                          Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Presencia Física",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        ...marketShare['marketShareDetails']
+                            .map<Widget>((detail) {
+                          final marketShareMap =
+                              parseCustomJSON(detail['marketShareJSON']);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildMarketShareRow(
+                                "${detail['localidad']}: ",
+                                detail['porcientoParticipacion'],
+                                localidadColors[detail['localidad']] ??
+                                    Colors.white,
+                                localidadColors[detail['localidad']] ??
+                                    Colors.white,
+                              ),
+                              ...marketShareMap.entries.map((entry) {
+                                return Text(
+                                  "• ${entry.key}: ${entry.value}",
+                                  style: const TextStyle(color: Colors.white),
+                                );
+                              }),
+                              const SizedBox(height: 8),
+                            ],
+                          );
+                        }).toList(),
+                        const SizedBox(height: 8),
+                        Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: const Color(0xFFb60000),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                ),
+                                child: const Text('Cerrar'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  fetchAndShowSuggestions(context, town);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.blue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                ),
+                                child: const Text('Sugerencia de POS'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
-        );
-      } else {
-        print("Error loading market share: ${response.message}");
-        _showErrorDialog(
-            context, "Error loading market share: ${response.message}");
-      }
-    } catch (e) {
-      print("Exception loading market share: $e");
-      _showErrorDialog(context, "Exception loading market share: $e");
+            ),
+          );
+        },
+      );
+    } else {
+      _showErrorDialog(context, "Error loading market share: ${response.message}");
     }
+  } catch (e) {
+    Navigator.of(context).pop();
+    _showErrorDialog(context, "Exception loading market share: $e");
   }
+}
 
   Widget _buildMarketShareRow(
       String label, String value, Color color1, Color color2) {

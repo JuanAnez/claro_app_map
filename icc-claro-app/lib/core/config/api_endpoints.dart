@@ -7,6 +7,7 @@ class ApiEndpoints {
   static const String login = '/login-ws';
   static const String logout = '/logout-ws';
   static const String getUserAuthorities = '/getUserAuthorities';
+  static const String me = '/me';
   
   // Polígonos y Cobertura
   static const String getPolygonTypes = '/getPolygonTypes';

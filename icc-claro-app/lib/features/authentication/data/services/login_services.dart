@@ -40,10 +40,9 @@ class LoginService {
             parsed['message'] is String) {
           final accessToken = parsed['message'] as String;
 
-          // Guarda en provider
+          // Guarda en provider y persiste entre sesiones
           userProvider.saveAccessToken(accessToken);
-          // Si quieres persistir entre sesiones, descomenta:
-          // await userProvider.persistAccessToken(accessToken);
+          await userProvider.persistAccessToken(accessToken);
 
           print('Token obtenido: $accessToken');
 

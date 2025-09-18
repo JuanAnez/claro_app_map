@@ -79,7 +79,7 @@ class MapsRepository {
       final response = await HttpAuthService.authenticatedGet(
         ApiEndpoints.getPosLocationsInfo,
         context: context,
-        useCache: true, // Usar caché para optimizar
+        useCache: true,
       );
 
       if (response.statusCode == 200) {

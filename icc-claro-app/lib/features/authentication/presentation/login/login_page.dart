@@ -25,6 +25,22 @@ class _LoginPageState extends State<LoginPage> {
   bool _passwordVisible = false;
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Inicialización simplificada - solo cargar token sin navegación automática
+    _loadTokenIfExists();
+  }
+
+  Future<void> _loadTokenIfExists() async {
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await userProvider.loadAccessToken();
+    } catch (e) {
+      print('Error cargando token: $e');
+    }
+  }
+
   void _onPressed() async {
     final username = _usernameController.text;
     final password = _passwordController.text;
@@ -50,6 +66,15 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
       _userProvider?.saveUser(response);
+      
+      // Cargar información del usuario después del login (opcional)
+      // No bloqueamos el login si falla loadMe
+      try {
+        _userProvider?.loadMe(context);
+      } catch (e) {
+        print('Error cargando información del usuario: $e');
+      }
+      
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

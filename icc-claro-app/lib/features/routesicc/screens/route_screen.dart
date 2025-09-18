@@ -278,7 +278,7 @@ class _RouteScreenState extends State<RouteScreen> {
                 backgroundColor: Color(0xFFb60000).withOpacity(0.1),
                 foregroundColor: Colors.white.withOpacity(0.7),
                 onPressed: () async {
-                  if (_filteredRoutes.isNotEmpty) {
+                  if (roles.contains('POS_USER')) {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -372,7 +372,6 @@ class _RouteScreenState extends State<RouteScreen> {
           context: context);
 
       _showDialog(context, "Éxito", message);
-      // _showSuccessSnackBar(context, message: message);
       await _fetchRoutes();
       setState(() {
         _selectionMode = false;
