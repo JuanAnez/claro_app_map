@@ -25,8 +25,8 @@ android {
         applicationId "claro.app.mobile.icc_claro_app"
         minSdkVersion 23
         targetSdkVersion 35
-        versionCode 1
-        versionName "1.0.0"
+        versionCode flutter.versionCode
+        versionName flutter.versionName
         multiDexEnabled true
     }
 

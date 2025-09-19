@@ -24,6 +24,11 @@ class LoginUseCase {
     return UserModel.fromJson(response.content);
   }
 
+  Future<MessageResponse> loginUserWithError(
+      String username, String password, UserProvider userProvider) async {
+    return await _loginService.doLogin(username, password, userProvider);
+  }
+
   Future<MessageResponse> logoutUser(UserProvider userProvider, BuildContext context) async {
     return await _loginService.doLogout(userProvider, context);
   }

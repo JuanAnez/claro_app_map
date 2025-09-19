@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 List<String> getRolesFromAuthorities(dynamic authorities) {
-    print("🔍 getRolesFromAuthorities DEBUG - INICIO");
-    print("  Input: '$authorities' (tipo: ${authorities.runtimeType})");
+    // print("🔍 getRolesFromAuthorities DEBUG - INICIO");
+    // print("  Input: '$authorities' (tipo: ${authorities.runtimeType})");
     
     if (authorities is String) {
-      print("  Es String, procesando...");
+      // print("  Es String, procesando...");
       
       // Primero intentar parsear como JSON (caso más común)
       try {
@@ -40,25 +40,25 @@ List<String> getRolesFromAuthorities(dynamic authorities) {
         }
       } catch (jsonError) {
         print("  No es JSON válido: $jsonError");
-        print("  Continuando con string directo...");
+        // print("  Continuando con string directo...");
       }
       
       // Caso: string directo como "POS_USER" o "POS_USER,POS_ADMIN"
-      print("  Procesando como string directo: '$authorities'");
+      // print("  Procesando como string directo: '$authorities'");
       if (authorities.contains(',')) {
         final roles = authorities.split(',').map((role) => role.trim()).toList();
-        print("  Roles extraídos (con comas): $roles");
+        // print("  Roles extraídos (con comas): $roles");
         return roles;
       } else {
         final roles = [authorities.trim()];
-        print("  Roles extraídos (sin comas): $roles");
+        // print("  Roles extraídos (sin comas): $roles");
         return roles;
       }
     } else {
       print("  No es String, es: ${authorities.runtimeType}");
     }
     
-    print("  Retornando lista vacía");
-    print("🔍 getRolesFromAuthorities DEBUG - FIN");
+    // print("  Retornando lista vacía");
+    // print("🔍 getRolesFromAuthorities DEBUG - FIN");
     return [];
   }

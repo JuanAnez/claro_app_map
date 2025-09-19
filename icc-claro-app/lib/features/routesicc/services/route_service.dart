@@ -133,7 +133,7 @@ class RouteService {
       );
 
       if (response.statusCode == 200) {
-        print('🔍 Respuesta de getRouteById: ${response.body}');
+        // print('🔍 Respuesta de getRouteById: ${response.body}');
 
         try {
           final Map<String, dynamic> jsonData = json.decode(response.body);

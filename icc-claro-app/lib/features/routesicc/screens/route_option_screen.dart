@@ -452,13 +452,13 @@ class _RouteOptionsScreenState extends State<RouteOptionsScreen> {
     final isManager = _isManagerRole(route, roles, username);
     final isAssistant = _isAssistantRole(route, roles, username);
 
-    print('🔍 Debug _buildButtons:');
-    print('  - Username: $username');
-    print('  - Roles: $roles');
-    print('  - Route ID: ${route.posLocationRouteID}');
-    print('  - Route Type: ${widget.routeType}');
-    print('  - Is Manager: $isManager');
-    print('  - Is Assistant: $isAssistant');
+    // print('🔍 Debug _buildButtons:');
+    // print('  - Username: $username');
+    // print('  - Roles: $roles');
+    // print('  - Route ID: ${route.posLocationRouteID}');
+    // print('  - Route Type: ${widget.routeType}');
+    // print('  - Is Manager: $isManager');
+    // print('  - Is Assistant: $isAssistant');
 
     bool isUser = roles.contains('POS_USER');
     bool isAdmin = roles.contains('POS_ADMIN');

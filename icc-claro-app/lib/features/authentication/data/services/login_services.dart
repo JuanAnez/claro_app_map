@@ -8,6 +8,8 @@ import 'package:icc_claro_app/data/models/payload/message_response.dart';
 import 'package:icc_claro_app/features/authentication/data/models/notification_service.dart';
 import 'package:icc_claro_app/features/authentication/users/user_provider.dart';
 import 'package:icc_claro_app/core/config/api_endpoints.dart';
+import 'package:icc_claro_app/core/services/version_check_service.dart';
+import 'package:icc_claro_app/core/types/login_error_types.dart';
 import 'package:icc_claro_app/features/features/providers/point_of_sale_providers.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LoginService {
   static const String baseUrl = 'http://192.168.1.5:7001/icc/api';
 
-  Future<String?> _getAccessToken(
+  Future<dynamic> _getAccessToken(
       String username, String password, UserProvider userProvider) async {
     final url = Uri.parse(ApiEndpoints.buildUrl(ApiEndpoints.loginWs));
     final client = HttpClient()
@@ -23,10 +25,20 @@ class LoginService {
           (X509Certificate cert, String host, int port) => true;
 
     try {
+      // Obtener la versión actual de la app
+      final currentVersion = await VersionCheckService.getCurrentVersion();
+      
       final HttpClientRequest apiRequest = await client.postUrl(url);
       apiRequest.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      apiRequest
-          .write(jsonEncode({"username": username, "password": password}));
+      
+      // Incluir la versión de la app en el payload
+      final loginPayload = {
+        "username": username, 
+        "password": password,
+        "appVersion": currentVersion
+      };
+      
+      apiRequest.write(jsonEncode(loginPayload));
 
       final HttpClientResponse apiResponse = await apiRequest.close();
       final responseBody = await apiResponse.transform(utf8.decoder).join();
@@ -50,22 +62,50 @@ class LoginService {
         } else {
           print('Error en el inicio de sesión: $responseBody');
         }
+      } else if (apiResponse.statusCode == 426) {
+        // Código 426 indica que la versión está obsoleta
+        print('Versión de la aplicación obsoleta: $responseBody');
+        return LoginError(
+          type: LoginErrorType.versionOutdated,
+          message: 'La versión de la aplicación está desactualizada',
+          details: responseBody,
+        );
       } else {
         print(
             'Error en el inicio de sesión: Código ${apiResponse.statusCode} Body: $responseBody');
       }
     } catch (e) {
       print('Excepción durante el inicio de sesión: $e');
+      return LoginError(
+        type: LoginErrorType.networkError,
+        message: 'Error de conexión',
+        details: e.toString(),
+      );
     } finally {
       client.close(force: true);
     }
-    return null;
+    return LoginError(
+      type: LoginErrorType.invalidCredentials,
+      message: 'Credenciales incorrectas',
+    );
   }
 
   Future<MessageResponse> doLogin(
       String username, String password, UserProvider userProvider) async {
-    final accessToken = await _getAccessToken(username, password, userProvider);
-    if (accessToken == null) {
+    final result = await _getAccessToken(username, password, userProvider);
+    
+    // Si es un LoginError, retornarlo
+    if (result is LoginError) {
+      return MessageResponse(
+        ok: false, 
+        message: result.message,
+        errorType: result.type,
+      );
+    }
+    
+    // Si es un string (token), continuar con el flujo normal
+    final accessToken = result as String;
+    if (accessToken.isEmpty) {
       return MessageResponse(
           ok: false, message: 'No se pudo obtener el token de acceso');
     }
@@ -79,11 +119,11 @@ class LoginService {
     try {
       final req = await client.getUrl(url);
       req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
-      print('🔑 Obteniendo autoridades para usuario: $username');
-      print('🌐 URL: $url');
+      // print('🔑 Obteniendo autoridades para usuario: $username');
+      // print('🌐 URL: $url');
       final res = await req.close();
       final body = await res.transform(utf8.decoder).join();
-      print('📋 Respuesta autoridades: $body');
+      // print('📋 Respuesta autoridades: $body');
 
       if (res.statusCode != HttpStatus.ok) {
         return MessageResponse(
@@ -137,13 +177,13 @@ class LoginService {
 
     final accessToken = userProvider.accessToken;
     if (accessToken == null) {
-      print(
-          '❌ Error: No se ha establecido el token de acceso para cerrar sesión');
+      // print(
+      //     '❌ Error: No se ha establecido el token de acceso para cerrar sesión');
       return MessageResponse(
           ok: false, message: 'No hay token para cerrar sesión');
     }
 
-    print('🔑 Token utilizado para el logout: $accessToken');
+    // print('🔑 Token utilizado para el logout: $accessToken');
 
     try {
       final HttpClientRequest apiRequest = await client.postUrl(url);
@@ -159,15 +199,15 @@ class LoginService {
         if (parsed is Map &&
             parsed['status'] == 200 &&
             parsed['code'] == "OK") {
-          print('✅ Respuesta del servidor: $parsed');
+          // print('✅ Respuesta del servidor: $parsed');
 
           await NotificationService.scheduleNotifications();
 
           final prefs = await SharedPreferences.getInstance();
           final success = await prefs.setBool('hasLoggedIn', false);
-          print("🗑️ Estado de sesión limpiado: $success");
+          // print("🗑️ Estado de sesión limpiado: $success");
 
-          print('✅ Logout exitoso, eliminando el token');
+          // print('✅ Logout exitoso, eliminando el token');
           userProvider.clearAccessToken();
           context.read<PointOfSaleProvider>().clearMarkersCache();
           return MessageResponse(
@@ -176,15 +216,15 @@ class LoginService {
           );
         } else {
           final msg = (parsed is Map ? parsed['message'] : responseBody);
-          print('❌ Error en el cierre de sesión: $msg');
+          // print('❌ Error en el cierre de sesión: $msg');
           return MessageResponse(
             ok: false,
             message: 'Error en el cierre de sesión: $msg',
           );
         }
       } else {
-        print(
-            '❌ Error en el cierre de sesión. Código: ${apiResponse.statusCode}, Respuesta: $responseBody');
+        // print(
+        //     '❌ Error en el cierre de sesión. Código: ${apiResponse.statusCode}, Respuesta: $responseBody');
         return MessageResponse(
           ok: false,
           message:
@@ -192,7 +232,7 @@ class LoginService {
         );
       }
     } catch (e) {
-      print('❌ Excepción durante el cierre de sesión: $e');
+      // print('❌ Excepción durante el cierre de sesión: $e');
       return MessageResponse(
         ok: false,
         message: 'Excepción durante el cierre de sesión: $e',

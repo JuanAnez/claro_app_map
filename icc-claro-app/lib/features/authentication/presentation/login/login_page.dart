@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:icc_claro_app/core/utils/buttons/login_buttons.dart';
 import 'package:icc_claro_app/core/widgets/inactivity_logout_widget.dart';
 import 'package:icc_claro_app/core/widgets/loading_animation.dart';
+import 'package:icc_claro_app/core/widgets/update_required_screen.dart';
+import 'package:icc_claro_app/core/services/version_check_service.dart';
+import 'package:icc_claro_app/core/types/login_error_types.dart';
+import 'package:icc_claro_app/features/authentication/data/models/user_model.dart';
 import 'package:icc_claro_app/features/authentication/domain/usecases/login_use_case.dart';
 import 'package:icc_claro_app/features/authentication/users/user_provider.dart';
 import 'package:icc_claro_app/features/home/home_page.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -28,8 +33,65 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // Inicialización simplificada - solo cargar token sin navegación automática
-    _loadTokenIfExists();
+    print('🎯 LoginPage initState ejecutado');
+    _printVersionInfoSync();
+    _printVersionInfo(); 
+    _checkVersionAndLoadToken();
+  }
+
+  void _printVersionInfoSync() {
+    print('📱 Método síncrono ejecutado');
+    print('🔧 Flutter version: ${WidgetsBinding.instance.platformDispatcher.platformBrightness}');
+  }
+
+  Future<void> _printVersionInfo() async {
+    try {
+      print('🔍 Iniciando obtención de información del paquete...');
+      final packageInfo = await PackageInfo.fromPlatform();
+      print('🚀 App iniciada - Versión: ${packageInfo.version}');
+      print('📱 Build: ${packageInfo.buildNumber}');
+      print('📦 Package: ${packageInfo.packageName}');
+      print('✅ Información del paquete obtenida correctamente');
+    } catch (e) {
+      print('❌ Error obteniendo info del paquete: $e');
+    }
+  }
+  /// Verifica la versión de la app y carga el token si es compatible
+  Future<void> _checkVersionAndLoadToken() async {
+    try {
+      // Verificar si la versión es compatible
+      final isCompatible = await VersionCheckService.isVersionCompatible();
+      
+      if (!isCompatible) {
+        // Si la versión no es compatible, mostrar pantalla de actualización
+        final currentVersion = await VersionCheckService.getCurrentVersion();
+        final requiredVersion = await VersionCheckService.getMinRequiredVersion();
+        _showUpdateRequiredScreen(currentVersion, requiredVersion);
+        return;
+      }
+      
+      // Si la versión es compatible, cargar token normalmente
+      _loadTokenIfExists();
+    } catch (e) {
+      print('Error verificando versión: $e');
+      // En caso de error, continuar con el flujo normal
+      _loadTokenIfExists();
+    }
+  }
+
+  /// Muestra la pantalla de actualización requerida
+  void _showUpdateRequiredScreen(String currentVersion, String requiredVersion) {
+    if (!mounted) return;
+    
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateRequiredScreen(
+          currentVersion: currentVersion,
+          requiredVersion: requiredVersion,
+        ),
+      ),
+    );
   }
 
   Future<void> _loadTokenIfExists() async {
@@ -56,16 +118,37 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
+    // Verificación adicional de versión durante el login
+    try {
+      final isVersionValid = await VersionCheckService.verifyVersionForLogin(username, password);
+      
+      if (!isVersionValid) {
+        setState(() {
+          _isLoading = false;
+        });
+        final currentVersion = await VersionCheckService.getCurrentVersion();
+        final requiredVersion = await VersionCheckService.getMinRequiredVersion();
+        _showUpdateRequiredScreen(currentVersion, requiredVersion);
+        return;
+      }
+    } catch (e) {
+      print('Error verificando versión para login: $e');
+      // Continuar con el login en caso de error
+    }
+
     final response =
-        await _loginUseCase.loginUser(username, password, _userProvider!);
+        await _loginUseCase.loginUserWithError(username, password, _userProvider!);
 
     if (!mounted) return;
 
-    if (response.username.isNotEmpty) {
-      setState(() {
-        _isLoading = false;
-      });
-      _userProvider?.saveUser(response);
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response.ok) {
+      // Login exitoso
+      final userModel = UserModel.fromJson(response.content);
+      _userProvider?.saveUser(userModel);
       
       // Cargar información del usuario después del login (opcional)
       // No bloqueamos el login si falla loadMe
@@ -83,10 +166,16 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } else {
-      setState(() {
-        _isLoading = false;
-      });
-      _showErrorDialog('Nombre de usuario o contraseña incorrectos');
+      // Manejar diferentes tipos de error
+      if (response.errorType == LoginErrorType.versionOutdated) {
+        // Mostrar pantalla de actualización
+        final currentVersion = await VersionCheckService.getCurrentVersion();
+        final requiredVersion = await VersionCheckService.getMinRequiredVersion();
+        _showUpdateRequiredScreen(currentVersion, requiredVersion);
+      } else {
+        // Mostrar error genérico
+        _showErrorDialog(response.message.isNotEmpty ? response.message : 'Error de inicio de sesión');
+      }
     }
   }
 

@@ -40,7 +40,7 @@ class HttpAuthService {
       
       // Verificar si el token está expirado
       if (await _isTokenExpired(context)) {
-        print('❌ Token expirado detectado en HttpAuthService GET');
+        // print('❌ Token expirado detectado en HttpAuthService GET');
         await _handleTokenExpired(context);
         throw Exception('Token expirado, redirigiendo al login');
       }
@@ -51,8 +51,8 @@ class HttpAuthService {
         'Authorization': 'Bearer $accessToken',
       };
       
-      print('🌐 Realizando petición GET a: $fullUrl');
-      print('🔑 Usando token: ${accessToken.substring(0, 20)}...');
+      // print('🌐 Realizando petición GET a: $fullUrl');
+      // print('🔑 Usando token: ${accessToken.substring(0, 20)}...');
       
       // Realizar petición HTTP
       final response = await http.get(
@@ -68,10 +68,10 @@ class HttpAuthService {
         }
         return response;
       } else if (response.statusCode == 401) {
-        print('❌ Error 401 - No autorizado');
-        print('   URL: $fullUrl');
-        print('   Token usado: ${accessToken.substring(0, 20)}...');
-        print('   Respuesta del servidor: ${response.body}');
+        // print('❌ Error 401 - No autorizado');
+        // print('   URL: $fullUrl');
+        // print('   Token usado: ${accessToken.substring(0, 20)}...');
+        // print('   Respuesta del servidor: ${response.body}');
         await _handleUnauthorized(context);
         throw Exception('No autorizado: Token inválido o expirado');
       } else if (response.statusCode == 403) {
@@ -127,9 +127,9 @@ class HttpAuthService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response;
       } else if (response.statusCode == 401) {
-        print('❌ Error 401 - No autorizado');
-        print('   URL: $fullUrl');
-        print('   Token usado: ${accessToken.substring(0, 20)}...');
+        // print('❌ Error 401 - No autorizado');
+        // print('   URL: $fullUrl');
+        // print('   Token usado: ${accessToken.substring(0, 20)}...');
         print('   Respuesta del servidor: ${response.body}');
         await _handleUnauthorized(context);
         throw Exception('No autorizado: Token inválido o expirado');
@@ -186,10 +186,10 @@ class HttpAuthService {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return response;
       } else if (response.statusCode == 401) {
-        print('❌ Error 401 - No autorizado');
-        print('   URL: $fullUrl');
-        print('   Token usado: ${accessToken.substring(0, 20)}...');
-        print('   Respuesta del servidor: ${response.body}');
+        // print('❌ Error 401 - No autorizado');
+        // print('   URL: $fullUrl');
+        // print('   Token usado: ${accessToken.substring(0, 20)}...');
+        // print('   Respuesta del servidor: ${response.body}');
         await _handleUnauthorized(context);
         throw Exception('No autorizado: Token inválido o expirado');
       } else if (response.statusCode == 403) {
@@ -243,10 +243,10 @@ class HttpAuthService {
       if (response.statusCode == 200 || response.statusCode == 204) {
         return response;
       } else if (response.statusCode == 401) {
-        print('❌ Error 401 - No autorizado');
-        print('   URL: $fullUrl');
-        print('   Token usado: ${accessToken.substring(0, 20)}...');
-        print('   Respuesta del servidor: ${response.body}');
+        // print('❌ Error 401 - No autorizado');
+        // print('   URL: $fullUrl');
+        // print('   Token usado: ${accessToken.substring(0, 20)}...');
+        // print('   Respuesta del servidor: ${response.body}');
         await _handleUnauthorized(context);
         throw Exception('No autorizado: Token inválido o expirado');
       } else if (response.statusCode == 403) {

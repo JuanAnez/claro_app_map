@@ -63,11 +63,11 @@ class UserProvider extends ChangeNotifier {
     final isExpired = now.isAfter(expirationDate);
     
     // Print información del token
-    print('🔑 Token Info:');
-    print('   Hora actual: ${now.toIso8601String()}');
-    print('   Expira en: ${expirationDate.toIso8601String()}');
-    print('   Duración restante: ${expirationDate.difference(now).inSeconds} segundos');
-    print('   ¿Expirado?: $isExpired');
+    // print('🔑 Token Info:');
+    // print('   Hora actual: ${now.toIso8601String()}');
+    // print('   Expira en: ${expirationDate.toIso8601String()}');
+    // print('   Duración restante: ${expirationDate.difference(now).inSeconds} segundos');
+    // print('   ¿Expirado?: $isExpired');
 
     return isExpired;
   }
@@ -110,15 +110,15 @@ class UserProvider extends ChangeNotifier {
   }
   
   void _printTokenInfo(String token) {
-    print('🔑 Token obtenido: $token');
+    // print('🔑 Token obtenido: $token');
     final expirationDate = getJwtExpirationDate(token);
     if (expirationDate != null) {
       final now = DateTime.now();
       final duration = expirationDate.difference(now);
-      print('🔑 Token Info al guardar:');
-      print('   Hora actual: ${now.toIso8601String()}');
-      print('   Expira en: ${expirationDate.toIso8601String()}');
-      print('   Duración total: ${duration.inSeconds} segundos (${duration.inMinutes} minutos)');
+      // print('🔑 Token Info al guardar:');
+      // print('   Hora actual: ${now.toIso8601String()}');
+      // print('   Expira en: ${expirationDate.toIso8601String()}');
+      // print('   Duración total: ${duration.inSeconds} segundos (${duration.inMinutes} minutos)');
     }
   }
 

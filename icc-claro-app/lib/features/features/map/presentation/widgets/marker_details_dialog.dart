@@ -23,8 +23,8 @@ void showMarkerDetails(
   RouteModel? routeModel,
 }) {
   final int? posLocationId = location['posLocationId'];
-  print("🔍 showMarkerDetails - posLocationId: $posLocationId");
-  print("🔍 showMarkerDetails - location completa: $location");
+  // print("🔍 showMarkerDetails - posLocationId: $posLocationId");
+  // print("🔍 showMarkerDetails - location completa: $location");
 
   if (posLocationId == null) {
     print("Error: posLocationId no encontrado en la ubicación.");

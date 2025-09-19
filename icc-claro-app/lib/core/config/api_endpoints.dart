@@ -8,6 +8,10 @@ class ApiEndpoints {
   static const String logout = '/logout-ws';
   static const String getUserAuthorities = '/getUserAuthorities';
   static const String me = '/me';
+
+   // Verificación de versión
+  static const String versionCheck = '/version-check';
+  static const String minVersion = '/min-version';
   
   // Polígonos y Cobertura
   static const String getPolygonTypes = '/getPolygonTypes';
